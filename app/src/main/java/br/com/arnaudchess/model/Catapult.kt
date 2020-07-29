@@ -19,9 +19,6 @@ class Catapult(color: Boolean) : Piece(color) {
 
             init {
                 setupIcon()
-                context.resources.getDimensionPixelOffset(R.dimen.piece_padding).let {
-                    setPadding(it, it, it, it)
-                }
             }
         }
     }
