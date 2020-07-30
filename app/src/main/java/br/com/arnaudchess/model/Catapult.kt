@@ -6,9 +6,7 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Catapult(color: Boolean) : Piece(color) {
 
-    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
-        return arrayListOf()
-    }
+
 
     override fun createImageView(context: Context): PieceImageView {
         return object : PieceImageView(context, this@Catapult) {
@@ -21,5 +19,19 @@ class Catapult(color: Boolean) : Piece(color) {
                 setupIcon()
             }
         }
+    }
+
+    override fun canJumpWhileMoving(): Boolean {
+        return false
+    }
+
+    override fun canJumpWhenCapturing(): Boolean {
+        return true
+    }
+
+    override var isInvulnerable: Boolean = false
+
+    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
+        return arrayListOf()
     }
 }

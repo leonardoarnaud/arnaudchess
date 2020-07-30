@@ -22,4 +22,14 @@ class Ninja : Piece(false) {
             }
         }
     }
+
+    override fun canJumpWhileMoving(): Boolean {
+        return true
+    }
+
+    override fun canJumpWhenCapturing(): Boolean {
+        return true
+    }
+
+    override var isInvulnerable: Boolean = false
 }

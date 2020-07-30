@@ -6,10 +6,6 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Viking : Piece(true) {
 
-    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
-        return arrayListOf()
-    }
-
     override fun createImageView(context: Context): PieceImageView {
         return object : PieceImageView(context, this@Viking) {
             override var colors = Pair(
@@ -21,5 +17,19 @@ class Viking : Piece(true) {
                 setupIcon()
             }
         }
+    }
+
+    override fun canJumpWhileMoving(): Boolean {
+        return false
+    }
+
+    override fun canJumpWhenCapturing(): Boolean {
+        return false
+    }
+
+    override var isInvulnerable: Boolean = false
+
+    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
+        return arrayListOf()
     }
 }

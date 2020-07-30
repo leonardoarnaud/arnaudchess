@@ -6,6 +6,29 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Rook(color: Boolean) : Piece(color) {
 
+    override fun canJumpWhileMoving(): Boolean {
+        return false
+    }
+
+    override fun canJumpWhenCapturing(): Boolean {
+        return false
+    }
+
+    override fun createImageView(context: Context): PieceImageView {
+        return object : PieceImageView(context, this@Rook) {
+            override var colors = Pair(
+                R.drawable.ic_rook_white,
+                R.drawable.ic_rook_black
+            )
+
+            init {
+                setupIcon()
+            }
+        }
+    }
+
+    override var isInvulnerable: Boolean = false
+
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when (position) {
             _a1 -> arrayListOf(
@@ -1462,16 +1485,4 @@ class Rook(color: Boolean) : Piece(color) {
         }
     }
 
-    override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Rook) {
-            override var colors = Pair(
-                R.drawable.ic_rook_white,
-                R.drawable.ic_rook_black
-            )
-
-            init {
-                setupIcon()
-            }
-        }
-    }
 }

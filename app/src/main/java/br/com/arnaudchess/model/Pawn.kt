@@ -22,4 +22,14 @@ class Pawn(color: Boolean) : Piece(color) {
             }
         }
     }
+
+    override fun canJumpWhileMoving(): Boolean {
+        return false
+    }
+
+    override fun canJumpWhenCapturing(): Boolean {
+        return false
+    }
+
+    override var isInvulnerable: Boolean = false
 }

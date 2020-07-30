@@ -7,10 +7,6 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Archer(color: Boolean) : Piece(color) {
 
-    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
-        return arrayListOf()
-    }
-
     override fun createImageView(context: Context): PieceImageView {
         return object : PieceImageView(context, this@Archer) {
             override var colors = Pair(
@@ -23,4 +19,19 @@ class Archer(color: Boolean) : Piece(color) {
             }
         }
     }
+
+    override fun canJumpWhileMoving(): Boolean {
+        return true
+    }
+
+    override fun canJumpWhenCapturing(): Boolean {
+        return true
+    }
+
+    override var isInvulnerable: Boolean = false
+
+    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
+        return arrayListOf()
+    }
+
 }

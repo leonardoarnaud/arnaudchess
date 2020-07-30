@@ -8,6 +8,9 @@ abstract class Piece(
 ) {
     abstract fun getLegalEndPositionsFrom(position: Int): ArrayList<Int>
     abstract fun createImageView(context: Context): PieceImageView
+    abstract fun canJumpWhileMoving(): Boolean
+    abstract fun canJumpWhenCapturing(): Boolean
+    abstract var isInvulnerable: Boolean
 
     companion object {
         const val WHITE = true

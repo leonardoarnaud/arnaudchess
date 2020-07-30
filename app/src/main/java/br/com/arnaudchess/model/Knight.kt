@@ -112,4 +112,14 @@ class Knight(color: Boolean) : Piece(color) {
             }
         }
     }
+
+    override fun canJumpWhileMoving(): Boolean {
+        return true
+    }
+
+    override fun canJumpWhenCapturing(): Boolean {
+        return true
+    }
+
+    override var isInvulnerable: Boolean = false
 }

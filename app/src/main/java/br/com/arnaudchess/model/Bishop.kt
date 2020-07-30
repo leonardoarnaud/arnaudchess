@@ -6,6 +6,29 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Bishop(color: Boolean) : Piece(color) {
 
+    override fun createImageView(context: Context): PieceImageView {
+        return object : PieceImageView(context, this@Bishop) {
+            override var colors = Pair(
+                R.drawable.ic_bishop_white,
+                R.drawable.ic_bishop_black
+            )
+
+            init {
+                setupIcon()
+            }
+        }
+    }
+
+    override fun canJumpWhileMoving(): Boolean {
+        return false
+    }
+
+    override fun canJumpWhenCapturing(): Boolean {
+        return false
+    }
+
+    override var isInvulnerable: Boolean = false
+
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when (position) {
             _a2 -> arrayListOf(_b1, _b3, _c4, _d5, _e6, _f7, _g8)
@@ -89,19 +112,6 @@ class Bishop(color: Boolean) : Piece(color) {
             _j3 -> arrayListOf(_h1, _i2, _i4, _h5, _g6, _f7, _e8)
             _j2 -> arrayListOf(_i1, _i3, _h4, _g5, _f6, _e7, _d8)
             else -> arrayListOf()
-        }
-    }
-
-    override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Bishop) {
-            override var colors = Pair(
-                R.drawable.ic_bishop_white,
-                R.drawable.ic_bishop_black
-            )
-
-            init {
-                setupIcon()
-            }
         }
     }
 }
