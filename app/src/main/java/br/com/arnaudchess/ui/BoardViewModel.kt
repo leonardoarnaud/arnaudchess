@@ -115,10 +115,13 @@ class BoardViewModel : ViewModel() {
     fun movePiece(start: Int, end: Int) {
         boardConfiguration.value?.let { bc ->
             val legalPositions = bc[start]?.getLegalEndPositionsFrom(start)
+            val isCapturing = bc[end] != null
+            val isMoving = bc[end] == null
             if (legalPositions?.contains(end) == true
-                && getPiecesBetween(start, end).isEmpty()
+                && (((isCapturing && (bc[start]?.canJumpWhenCapturing() == true))
+                        || (isMoving && (bc[start]?.canJumpWhileMoving() == true)))
+                                || getPiecesBetween(start, end).isEmpty())
                 && bc[end]?.color != bc[start]?.color
-
             ) {
                 bc[end]?.let { capturedPieces.add(it) }
                 bc[end] = bc[start]!!
