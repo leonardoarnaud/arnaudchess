@@ -34,7 +34,7 @@ class Knight(color: Boolean) : Piece(color) {
             _b3 -> arrayListOf(_a5, _c5, _d4, _d2, _c1, _a1)
             _c3 -> arrayListOf(_b5, _d5, _e4, _a4, _e2, _a2, _d1, _b1)
             _d3 -> arrayListOf(_c5, _e5, _f4, _b4, _b2, _f2, _b2, _e1, _c1)
-            _e3 -> arrayListOf(_d5, _f5, _g4, _c4, _g2, _c2, _f1, _c1)
+            _e3 -> arrayListOf(_d5, _f5, _g4, _c4, _g2, _c2, _f1, _d1)
             _f3 -> arrayListOf(_e5, _g5, _h4, _d4, _h2, _d2, _g1, _e1)
             _g3 -> arrayListOf(_f5, _h5, _e4, _e2, _h1, _f1, _i4, _i2)
             _h3 -> arrayListOf(_g5, _f4, _f2, _g1, _i5, _j4, _j2, _i1)
