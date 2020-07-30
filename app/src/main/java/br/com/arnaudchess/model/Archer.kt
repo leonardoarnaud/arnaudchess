@@ -31,7 +31,10 @@ class Archer(color: Boolean) : Piece(color) {
     override var isInvulnerable: Boolean = false
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
-        return arrayListOf()
+        return when (position) {
+
+            else -> arrayListOf()
+        }
     }
 
 }
