@@ -15,5 +15,7 @@ abstract class Piece(
     companion object {
         const val WHITE = true
         const val BLACK = false
+        const val UP = true
+        const val DOWN = false
     }
 }

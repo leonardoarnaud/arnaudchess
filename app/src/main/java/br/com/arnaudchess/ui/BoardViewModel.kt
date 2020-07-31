@@ -5,6 +5,8 @@ import androidx.lifecycle.ViewModel
 import br.com.arnaudchess.*
 import br.com.arnaudchess.model.*
 import br.com.arnaudchess.model.Piece.Companion.BLACK
+import br.com.arnaudchess.model.Piece.Companion.DOWN
+import br.com.arnaudchess.model.Piece.Companion.UP
 import br.com.arnaudchess.model.Piece.Companion.WHITE
 
 class BoardViewModel : ViewModel() {
@@ -83,7 +85,7 @@ class BoardViewModel : ViewModel() {
             put(_c2, Pawn(WHITE))
             put(_d2, Knight(WHITE))
             //put(_e2, Swordsman(WHITE))
-            put(_f2, Swordsman(WHITE))
+            put(_f2, Swordsman(WHITE, UP))
             put(_g2, Knight(WHITE))
             //put(_h2, Pawn(WHITE))
             //put(_i2, Pawn(WHITE))
@@ -103,7 +105,7 @@ class BoardViewModel : ViewModel() {
             put(_b7, Pawn(BLACK))
             put(_c7, Pawn(BLACK))
             put(_d7, Knight(BLACK))
-            //put(_e7, Swordsman(BLACK))
+            put(_e7, Swordsman(BLACK, DOWN))
             //put(_f7, Swordsman(BLACK))
             put(_g7, Knight(BLACK))
             //put(_h7, Pawn(BLACK))
