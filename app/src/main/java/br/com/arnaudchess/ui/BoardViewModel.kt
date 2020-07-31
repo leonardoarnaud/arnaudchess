@@ -114,7 +114,7 @@ class BoardViewModel : ViewModel() {
         })
     }
 
-    fun movePiece(start: Int, end: Int) {
+    fun movePiece(start: Int, end: Int, isHintCheck: Boolean = false): Boolean {
         boardConfiguration.value?.let { bc ->
             val pieceAtStart = bc[start]
             val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
@@ -134,14 +134,22 @@ class BoardViewModel : ViewModel() {
             } catch (e: Exception){
                 false
             }
+
             val isValidPiecePath = isCapturingAndCanJumpCapturing || isMovingAndCanJumpMoving || isPathFree
-            if (isPieceLegalMove && isValidPiecePath && isEnemyPieceOrEmptySquare && !isPawnAndCapturingAtFront) {
-                bc[end]?.let { capturedPieces.add(it) }
-                bc[end] = bc[start]!!
-                bc.remove(start)
-                boardConfiguration.value = bc
+
+            return if (isPieceLegalMove && isValidPiecePath && isEnemyPieceOrEmptySquare && !isPawnAndCapturingAtFront) {
+                if (!isHintCheck){
+                    bc[end]?.let { capturedPieces.add(it) }
+                    bc[end] = bc[start]!!
+                    bc.remove(start)
+                    boardConfiguration.value = bc
+                }
+                true
+            } else {
+                false
             }
         }
+        return false
     }
 
     private fun getPiecesBetween(start: Int, end: Int): ArrayList<Piece> {

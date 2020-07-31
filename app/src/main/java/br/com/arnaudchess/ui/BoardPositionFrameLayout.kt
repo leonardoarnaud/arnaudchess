@@ -34,7 +34,11 @@ class BoardPositionFrameLayout : FrameLayout {
         foreground = ContextCompat.getDrawable(context, R.drawable.border_light)
     }
 
-    fun unselect() {
+    fun hint() {
+        foreground = ContextCompat.getDrawable(context, R.drawable.border_green)
+    }
+
+    fun removeBorder() {
         foreground = null
     }
 

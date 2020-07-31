@@ -87,24 +87,44 @@ class BoardFragment : Fragment() {
         }
     }
 
+    private fun clearBorders() {
+        boardPositions.map {
+            it.removeBorder()
+        }
+    }
+
     private fun selectToMove(sbf: BoardPositionFrameLayout) {
         if (selectedBoardPositionFrameLayout != null
             && selectedBoardPositionFrameLayout!!.getPieceImageView()?.piece?.color == sbf.getPieceImageView()?.piece?.color
         ) {
-            selectedBoardPositionFrameLayout?.unselect()
+            clearBorders()
             selectedBoardPositionFrameLayout = null
         }
         if (selectedBoardPositionFrameLayout == null) {
             if (!sbf.containsPiece()) return
             selectedBoardPositionFrameLayout = sbf
             sbf.select()
+            sbf.getPieceImageView()?.piece?.getLegalEndPositionsFrom(sbf.id)?.map { legalEndPosition ->
+                view?.findViewById<BoardPositionFrameLayout>(legalEndPosition)?.let { legalEndBoardPosition ->
+                    if (vm.movePiece(
+                        start = selectedBoardPositionFrameLayout!!.id,
+                        end = legalEndPosition,
+                        isHintCheck = true)
+                    ){
+                        legalEndBoardPosition.hint()
+                    }
+                }
+            }
         } else {
             try {
-                vm.movePiece(selectedBoardPositionFrameLayout!!.id, sbf.id)
+                vm.movePiece(
+                    start = selectedBoardPositionFrameLayout!!.id,
+                    end = sbf.id
+                )
             } catch (e: Exception) {
                 Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
             }
-            selectedBoardPositionFrameLayout!!.unselect()
+            clearBorders()
             selectedBoardPositionFrameLayout = null
         }
     }
