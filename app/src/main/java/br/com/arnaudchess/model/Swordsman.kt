@@ -4,9 +4,9 @@ import android.content.Context
 import br.com.arnaudchess.*
 import br.com.arnaudchess.ui.PieceImageView
 
-class Swordsman(
+open class Swordsman(
     color: Boolean,
-    val direction: Boolean
+    open val direction: Boolean
 ) : Piece(color) {
 
     override fun createImageView(context: Context): PieceImageView {

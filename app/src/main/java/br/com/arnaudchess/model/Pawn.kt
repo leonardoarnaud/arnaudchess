@@ -1,14 +1,10 @@
 package br.com.arnaudchess.model
 
 import android.content.Context
-import br.com.arnaudchess.R
+import br.com.arnaudchess.*
 import br.com.arnaudchess.ui.PieceImageView
 
-class Pawn(color: Boolean) : Piece(color) {
-
-    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
-        return arrayListOf()
-    }
+class Pawn(color: Boolean, override val direction: Boolean) : Swordsman(color, direction) {
 
     override fun createImageView(context: Context): PieceImageView {
         return object : PieceImageView(context, this@Pawn) {
@@ -23,13 +19,136 @@ class Pawn(color: Boolean) : Piece(color) {
         }
     }
 
-    override fun canJumpWhileMoving(): Boolean {
-        return false
+    fun getFrontPositions(position: Int): ArrayList<Int> {
+        return when (direction) {
+            UP -> when (position) {
+                _a2 -> arrayListOf(_a3,_a4)
+                _b2 -> arrayListOf(_b3,_b4)
+                _c2 -> arrayListOf(_c3,_c4)
+                _d2 -> arrayListOf(_d3,_d4)
+                _e2 -> arrayListOf(_e3,_e4)
+                _f2 -> arrayListOf(_f3,_f4)
+                _g2 -> arrayListOf(_g3,_g4)
+                _h2 -> arrayListOf(_h3,_h4)
+                _i2 -> arrayListOf(_i3,_i4)
+                _j2 -> arrayListOf(_j3,_j4)
+                _a3 -> arrayListOf(_a4)
+                _b3 -> arrayListOf(_b4)
+                _c3 -> arrayListOf(_c4)
+                _d3 -> arrayListOf(_d4)
+                _e3 -> arrayListOf(_e4)
+                _f3 -> arrayListOf(_f4)
+                _g3 -> arrayListOf(_g4)
+                _h3 -> arrayListOf(_h4)
+                _i3 -> arrayListOf(_i4)
+                _j3 -> arrayListOf(_j4)
+                _a4 -> arrayListOf(_a5)
+                _b4 -> arrayListOf(_b5)
+                _c4 -> arrayListOf(_c5)
+                _d4 -> arrayListOf(_d5)
+                _e4 -> arrayListOf(_e5)
+                _f4 -> arrayListOf(_f5)
+                _g4 -> arrayListOf(_g5)
+                _h4 -> arrayListOf(_h5)
+                _i4 -> arrayListOf(_i5)
+                _j4 -> arrayListOf(_j5)
+                _a5 -> arrayListOf(_a6)
+                _b5 -> arrayListOf(_b6)
+                _c5 -> arrayListOf(_c6)
+                _d5 -> arrayListOf(_d6)
+                _e5 -> arrayListOf(_e6)
+                _f5 -> arrayListOf(_f6)
+                _g5 -> arrayListOf(_g6)
+                _h5 -> arrayListOf(_h6)
+                _i5 -> arrayListOf(_i6)
+                _j5 -> arrayListOf(_j6)
+                _a6 -> arrayListOf(_a7)
+                _b6 -> arrayListOf(_b7)
+                _c6 -> arrayListOf(_c7)
+                _d6 -> arrayListOf(_d7)
+                _e6 -> arrayListOf(_e7)
+                _f6 -> arrayListOf(_f7)
+                _g6 -> arrayListOf(_g7)
+                _h6 -> arrayListOf(_h7)
+                _i6 -> arrayListOf(_i7)
+                _j6 -> arrayListOf(_j7)
+                _a7 -> arrayListOf(_a8)
+                _b7 -> arrayListOf(_b8)
+                _c7 -> arrayListOf(_c8)
+                _d7 -> arrayListOf(_d8)
+                _e7 -> arrayListOf(_e8)
+                _f7 -> arrayListOf(_f8)
+                _g7 -> arrayListOf(_g8)
+                _h7 -> arrayListOf(_h8)
+                _i7 -> arrayListOf(_i8)
+                _j7 -> arrayListOf(_j8)
+                else -> arrayListOf()
+            }
+            DOWN -> when (position) {
+                _a7 -> arrayListOf(_a6,_a5)
+                _b7 -> arrayListOf(_b6,_b5)
+                _c7 -> arrayListOf(_c6,_c5)
+                _d7 -> arrayListOf(_d6,_d5)
+                _e7 -> arrayListOf(_e6,_e5)
+                _f7 -> arrayListOf(_f6,_f5)
+                _g7 -> arrayListOf(_g6,_g5)
+                _h7 -> arrayListOf(_h6,_h5)
+                _i7 -> arrayListOf(_i6,_i5)
+                _j7 -> arrayListOf(_j6,_j5)
+                _a3 -> arrayListOf(_a2)
+                _b3 -> arrayListOf(_b2)
+                _c3 -> arrayListOf(_c2)
+                _d3 -> arrayListOf(_d2)
+                _e3 -> arrayListOf(_e2)
+                _f3 -> arrayListOf(_f2)
+                _g3 -> arrayListOf(_g2)
+                _h3 -> arrayListOf(_h2)
+                _i3 -> arrayListOf(_i2)
+                _j3 -> arrayListOf(_j2)
+                _a4 -> arrayListOf(_a3)
+                _b4 -> arrayListOf(_b3)
+                _c4 -> arrayListOf(_c3)
+                _d4 -> arrayListOf(_d3)
+                _e4 -> arrayListOf(_e3)
+                _f4 -> arrayListOf(_f3)
+                _g4 -> arrayListOf(_g3)
+                _h4 -> arrayListOf(_h3)
+                _i4 -> arrayListOf(_i3)
+                _j4 -> arrayListOf(_j3)
+                _a5 -> arrayListOf(_a4)
+                _b5 -> arrayListOf(_b4)
+                _c5 -> arrayListOf(_c4)
+                _d5 -> arrayListOf(_d4)
+                _e5 -> arrayListOf(_e4)
+                _f5 -> arrayListOf(_f4)
+                _g5 -> arrayListOf(_g4)
+                _h5 -> arrayListOf(_h4)
+                _i5 -> arrayListOf(_i4)
+                _j5 -> arrayListOf(_j4)
+                _a6 -> arrayListOf(_a5)
+                _b6 -> arrayListOf(_b5)
+                _c6 -> arrayListOf(_c5)
+                _d6 -> arrayListOf(_d5)
+                _e6 -> arrayListOf(_e5)
+                _f6 -> arrayListOf(_f5)
+                _g6 -> arrayListOf(_g5)
+                _h6 -> arrayListOf(_h5)
+                _i6 -> arrayListOf(_i5)
+                _j6 -> arrayListOf(_j5)
+                _a2 -> arrayListOf(_a1)
+                _b2 -> arrayListOf(_b1)
+                _c2 -> arrayListOf(_c1)
+                _d2 -> arrayListOf(_d1)
+                _e2 -> arrayListOf(_e1)
+                _f2 -> arrayListOf(_f1)
+                _g2 -> arrayListOf(_g1)
+                _h2 -> arrayListOf(_h1)
+                _i2 -> arrayListOf(_i1)
+                _j2 -> arrayListOf(_j1)
+                else -> arrayListOf()
+            }
+            else -> arrayListOf()
+        }
     }
 
-    override fun canJumpWhenCapturing(): Boolean {
-        return false
-    }
-
-    override var isInvulnerable: Boolean = false
 }

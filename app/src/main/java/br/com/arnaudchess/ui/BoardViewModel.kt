@@ -80,16 +80,16 @@ class BoardViewModel : ViewModel() {
             put(_h1, Archer(WHITE))
             put(_i1, Catapult(WHITE))
             put(_j1, Rook(WHITE))
-            //put(_a2, Pawn(WHITE))
-            //put(_b2, Pawn(WHITE))
-            put(_c2, Pawn(WHITE))
+            //put(_a2, Pawn(WHITE, UP))
+            //put(_b2, Pawn(WHITE, UP))
+            put(_c2, Pawn(WHITE, UP))
             put(_d2, Knight(WHITE))
-            //put(_e2, Swordsman(WHITE))
+            //put(_e2, Swordsman(UP))
             put(_f2, Swordsman(WHITE, UP))
             put(_g2, Knight(WHITE))
-            //put(_h2, Pawn(WHITE))
-            //put(_i2, Pawn(WHITE))
-            put(_j2, Pawn(WHITE))
+            //put(_h2, Pawn(WHITE, UP))
+            //put(_i2, Pawn(WHITE, UP))
+            put(_j2, Pawn(WHITE, UP))
             put(_a8, Rook(BLACK))
             put(_b8, Catapult(BLACK))
             put(_a6, Ninja())
@@ -100,31 +100,42 @@ class BoardViewModel : ViewModel() {
             put(_g8, Bishop(BLACK))
             put(_h8, Archer(BLACK))
             put(_i8, Catapult(BLACK))
-            // put(_j8, Rook(BLACK))
-            // put(_a7, Pawn(BLACK))
-            put(_b7, Pawn(BLACK))
-            put(_c7, Pawn(BLACK))
+            // put(_j8, Rook(BLACK, DOWN))
+            // put(_a7, Pawn(BLACK, DOWN))
+            put(_b7, Pawn(BLACK, DOWN))
+            put(_c7, Pawn(BLACK, DOWN))
             put(_d7, Knight(BLACK))
             put(_e7, Swordsman(BLACK, DOWN))
-            //put(_f7, Swordsman(BLACK))
+            //put(_f7, Swordsman(BLACK, DOWN))
             put(_g7, Knight(BLACK))
-            //put(_h7, Pawn(BLACK))
-            //(_i7, Pawn(BLACK))
-            put(_j7, Pawn(BLACK))
+            //put(_h7, Pawn(BLACK, DOWN))
+            //(_i7, Pawn(BLACK, DOWN))
+            put(_j7, Pawn(BLACK, DOWN))
         })
     }
 
     fun movePiece(start: Int, end: Int) {
         boardConfiguration.value?.let { bc ->
-            val legalPositions = bc[start]?.getLegalEndPositionsFrom(start)
+            val pieceAtStart = bc[start]
+            val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
             val isCapturing = bc[end] != null
             val isMoving = bc[end] == null
-            if (legalPositions?.contains(end) == true
-                && (((isCapturing && (bc[start]?.canJumpWhenCapturing() == true))
-                        || (isMoving && (bc[start]?.canJumpWhileMoving() == true)))
-                                || getPiecesBetween(start, end).isEmpty())
-                && bc[end]?.color != bc[start]?.color
-            ) {
+            val isPieceLegalMove = legalPositions?.contains(end) == true
+            val canJumpCapturing = pieceAtStart?.canJumpWhenCapturing() == true
+            val canJumpMoving = pieceAtStart?.canJumpWhileMoving() == true
+            val isPathFree = getPiecesBetween(start, end).isEmpty()
+            val isEnemyPieceOrEmptySquare = bc[end]?.color != bc[start]?.color
+            val isCapturingAndCanJumpCapturing = isCapturing && canJumpCapturing
+            val isMovingAndCanJumpMoving = (isMoving && canJumpMoving)
+            val isPawnAndCapturingAtFront = try {
+                (pieceAtStart as Pawn).getFrontPositions(start).singleOrNull{
+                    bc[it] != null
+                } == end
+            } catch (e: Exception){
+                false
+            }
+            val isValidPiecePath = isCapturingAndCanJumpCapturing || isMovingAndCanJumpMoving || isPathFree
+            if (isPieceLegalMove && isValidPiecePath && isEnemyPieceOrEmptySquare && !isPawnAndCapturingAtFront) {
                 bc[end]?.let { capturedPieces.add(it) }
                 bc[end] = bc[start]!!
                 bc.remove(start)
