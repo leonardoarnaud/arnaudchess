@@ -65,6 +65,10 @@ class BoardFragment : Fragment() {
             }
         })
 
+        vm.message.observe(viewLifecycleOwner, Observer {
+            Toast.makeText(context, getString(it), Toast.LENGTH_SHORT).show()
+        })
+
         boardPositions.map {
             it.setOnClickListener {
                 selectToMove(it as BoardPositionFrameLayout)
@@ -106,24 +110,19 @@ class BoardFragment : Fragment() {
             sbf.select()
             sbf.getPieceImageView()?.piece?.getLegalEndPositionsFrom(sbf.id)?.map { legalEndPosition ->
                 view?.findViewById<BoardPositionFrameLayout>(legalEndPosition)?.let { legalEndBoardPosition ->
-                    if (vm.movePiece(
+                    if (vm.validateMove(
                         start = selectedBoardPositionFrameLayout!!.id,
-                        end = legalEndPosition,
-                        isHintCheck = true)
+                        end = legalEndPosition).isValid
                     ){
                         legalEndBoardPosition.hint()
                     }
                 }
             }
         } else {
-            try {
-                vm.movePiece(
-                    start = selectedBoardPositionFrameLayout!!.id,
-                    end = sbf.id
-                )
-            } catch (e: Exception) {
-                Toast.makeText(context, e.message, Toast.LENGTH_LONG).show()
-            }
+            vm.validateMove(
+                start = selectedBoardPositionFrameLayout!!.id,
+                end = sbf.id
+            ).execute()
             clearBorders()
             selectedBoardPositionFrameLayout = null
         }

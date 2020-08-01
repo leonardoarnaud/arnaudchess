@@ -1,5 +1,6 @@
 package br.com.arnaudchess.ui
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import br.com.arnaudchess.*
@@ -12,6 +13,7 @@ import br.com.arnaudchess.model.Piece.Companion.WHITE
 class BoardViewModel : ViewModel() {
 
     val boardConfiguration = MutableLiveData<HashMap<Int, Piece>>()
+    val message = MutableLiveData<Int>()
 
     private val boardLines = ArrayList<ArrayList<Int>>().apply {
         add(arrayListOf(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8))
@@ -114,70 +116,132 @@ class BoardViewModel : ViewModel() {
         })
     }
 
-    fun movePiece(start: Int, end: Int, isHintCheck: Boolean = false): Boolean {
+    fun validateMove(start: Int, end: Int): Move{
         boardConfiguration.value?.let { bc ->
-            val pieceAtStart = bc[start]
-            val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
-            val isCapturing = bc[end] != null
-            val isMoving = bc[end] == null
-            val isPieceLegalMove = legalPositions?.contains(end) == true
-            val canJumpCapturing = pieceAtStart?.canJumpWhenCapturing() == true
-            val canJumpMoving = pieceAtStart?.canJumpWhileMoving() == true
-            val isPathFree = getPiecesBetween(start, end).isEmpty()
-            val isEnemyPieceOrEmptySquare = bc[end]?.color != bc[start]?.color
-            val isCapturingAndCanJumpCapturing = isCapturing && canJumpCapturing
-            val isMovingAndCanJumpMoving = (isMoving && canJumpMoving)
-            val isPawnAndCapturingAtFront = try {
-                (pieceAtStart as Pawn).getFrontPositions(start).singleOrNull{
-                    bc[it] != null
-                } == end
-            } catch (e: Exception){
-                false
-            }
+            return validateMove(start, end, bc)
+        }
+        return Move(start, end, isValid = false)
+    }
 
-            val isValidPiecePath = isCapturingAndCanJumpCapturing || isMovingAndCanJumpMoving || isPathFree
+    private fun validateMove(start: Int, end: Int, bc: HashMap<Int, Piece>, isSimulation: Boolean = false): Move {
+        val pieceAtStart = bc[start]
+        val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
+        val isCapturing = bc[end] != null
+        val isMoving = bc[end] == null
+        val isPieceLegalMove = legalPositions?.contains(end) == true
+        val canJumpCapturing = pieceAtStart?.canJumpWhenCapturing() == true
+        val canJumpMoving = pieceAtStart?.canJumpWhileMoving() == true
+        val isPathFree = getPiecesBetween(start, end, bc).isEmpty()
+        val isEnemyPieceOrEmptySquare = bc[end]?.color != bc[start]?.color
+        val isCapturingAndCanJumpCapturing = isCapturing && canJumpCapturing
+        val isMovingAndCanJumpMoving = (isMoving && canJumpMoving)
+        val moveLeavesKingInCheck = if (isSimulation) false else verifyKingCheck(start,end,pieceAtStart?.color)
 
-            return if (isPieceLegalMove && isValidPiecePath && isEnemyPieceOrEmptySquare && !isPawnAndCapturingAtFront) {
-                if (!isHintCheck){
-                    bc[end]?.let { capturedPieces.add(it) }
-                    bc[end] = bc[start]!!
-                    bc.remove(start)
-                    boardConfiguration.value = bc
+        val isPawnAndCapturingAtFront = try {
+            (pieceAtStart as Pawn).getFrontPositions(start).singleOrNull{
+                bc[it] != null
+            } == end
+        } catch (e: Exception){
+            false
+        }
+        val isValidPiecePath = isCapturingAndCanJumpCapturing || isMovingAndCanJumpMoving || isPathFree
+        return Move(start, end,
+            isValid = isPieceLegalMove
+                    && isValidPiecePath
+                    && isEnemyPieceOrEmptySquare
+                    && !isPawnAndCapturingAtFront
+                    && !moveLeavesKingInCheck)
+
+    }
+
+    private fun verifyKingCheck(start: Int, end: Int, startPieceColor: Boolean?): Boolean {
+        Log.i("ARNAUD","SIMULAÇÃO INICIADA")
+        val newBc = HashMap<Int, Piece>()
+        boardConfiguration.value?.map { newBc.put(it.key, it.value) }
+        movePiece(start, end, newBc)
+
+        newBc.filterValues {
+            it.color != startPieceColor
+        }.map { enemyPiece ->
+            val positions = enemyPiece.value.getLegalEndPositionsFrom(enemyPiece.key)
+            positions.map { pos ->
+                if (validateMove(enemyPiece.key, pos, newBc, true).isValid) {
+                    val foundKingAsPossibleEnemyMove = newBc[pos] is King
+                    if (foundKingAsPossibleEnemyMove) {
+                        Log.i("ARNAUD", "ACHOU REI")
+                        val pieceIsSameColor = newBc[pos]?.color == startPieceColor
+                        if (pieceIsSameColor) {
+                            Log.i("ARNAUD", "ACHOU REI DE MESMA COR")
+                            if (newBc[_e2] != null){
+                                Log.i("ARNAUD","ACHOU PEÇA EM E2")
+                            } else {
+                                Log.i("ARNAUD","NÃO ACHOU PEÇA EM E2")
+                            }
+                            return true
+                        }
+                    }
                 }
-                true
-            } else {
-                false
             }
         }
         return false
     }
 
-    private fun getPiecesBetween(start: Int, end: Int): ArrayList<Piece> {
-
+    fun movePiece(start: Int, end: Int): HashMap<Int,Piece> {
         boardConfiguration.value?.let { bc ->
-            boardLines.singleOrNull {
-                it.contains(start) && it.contains(end)
-            }?.let { currentLinePositions ->
-                val startIndex = currentLinePositions.indexOf(start)
-                val endIndex = currentLinePositions.indexOf(end)
-                return if (startIndex - endIndex !in -1..1) {
-                    val isCrescent = startIndex < endIndex
-                    ArrayList<Piece>().apply {
-                        currentLinePositions.subList(
-                            (if (isCrescent) startIndex else endIndex) + 1,
-                            (if (isCrescent) endIndex else startIndex)
-                        ).map { linePosition ->
-                            bc[linePosition]?.let { piece ->
-                                add(piece)
-                            }
+            return movePiece(start, end, bc)
+        }
+        return boardConfiguration.value!!
+    }
+
+    private fun movePiece(start: Int, end: Int, bc: HashMap<Int, Piece>): HashMap<Int,Piece> {
+        bc[end]?.let { capturedPieces.add(it) }
+        bc[end] = bc[start]!!
+        bc.remove(start)
+        return bc
+    }
+
+    private fun getPiecesBetween(start: Int, end: Int): ArrayList<Piece> {
+        boardConfiguration.value?.let { bc ->
+            return getPiecesBetween(start, end, bc)
+        }
+        return arrayListOf()
+    }
+
+    private fun getPiecesBetween(start: Int, end: Int, bc: HashMap<Int, Piece>): ArrayList<Piece> {
+        boardLines.singleOrNull {
+            it.contains(start) && it.contains(end)
+        }?.let { currentLinePositions ->
+            val startIndex = currentLinePositions.indexOf(start)
+            val endIndex = currentLinePositions.indexOf(end)
+            return if (startIndex - endIndex !in -1..1) {
+                val isCrescent = startIndex < endIndex
+                ArrayList<Piece>().apply {
+                    currentLinePositions.subList(
+                        (if (isCrescent) startIndex else endIndex) + 1,
+                        (if (isCrescent) endIndex else startIndex)
+                    ).map { linePosition ->
+                        bc[linePosition]?.let { piece ->
+                            add(piece)
                         }
                     }
-                } else {
-                    arrayListOf()
                 }
+            } else {
+                arrayListOf()
             }
         }
         return arrayListOf()
     }
 
+    inner class Move(val start: Int, val end: Int, val isValid: Boolean){
+
+        fun execute(){
+            if (isValid){
+                boardConfiguration.value = movePiece(start, end)
+            } else {
+                message.postValue(R.string.illegal_move)
+            }
+
+        }
+
+    }
 }
