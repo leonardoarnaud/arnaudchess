@@ -10,7 +10,7 @@ abstract class Piece(
     abstract fun createImageView(context: Context): PieceImageView
     abstract fun canJumpWhileMoving(): Boolean
     abstract fun canJumpWhenCapturing(): Boolean
-    abstract var isInvulnerable: Boolean
+    abstract var isDeadly: Boolean
 
     companion object {
         const val WHITE = true

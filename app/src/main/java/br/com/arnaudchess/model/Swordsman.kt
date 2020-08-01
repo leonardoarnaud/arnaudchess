@@ -30,11 +30,22 @@ open class Swordsman(
         return false
     }
 
-    override var isInvulnerable: Boolean = false
+    override var isDeadly: Boolean = false
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when(direction){
             UP -> when (position){
+                _a1 -> arrayListOf(_a2,_b2)
+                _b1 -> arrayListOf(_b2,_a2,_c2)
+                _c1 -> arrayListOf(_c2,_b2,_d2)
+                _d1 -> arrayListOf(_d2,_c2,_e2)
+                _e1 -> arrayListOf(_e2,_d2,_f2)
+                _f1 -> arrayListOf(_f2,_e2,_g2)
+                _g1 -> arrayListOf(_g2,_f2,_h2)
+                _h1 -> arrayListOf(_h2,_g2,_i2)
+                _i1 -> arrayListOf(_i2,_h2,_j2)
+                _j1 -> arrayListOf(_j2,_i2)
+
                 _a2 -> arrayListOf(_a3,_a4,_b3)
                 _b2 -> arrayListOf(_b3,_b4,_a3,_c3)
                 _c2 -> arrayListOf(_c3,_c4,_b3,_d3)
@@ -104,6 +115,17 @@ open class Swordsman(
                 else -> arrayListOf()
             }
             DOWN -> when (position){
+                _a8 -> arrayListOf(_a7,_b7)
+                _b8 -> arrayListOf(_b7,_a7,_c7)
+                _c8 -> arrayListOf(_c7,_b7,_d7)
+                _d8 -> arrayListOf(_d7,_c7,_e7)
+                _e8 -> arrayListOf(_e7,_d7,_f7)
+                _f8 -> arrayListOf(_f7,_e7,_g7)
+                _g8 -> arrayListOf(_g7,_f7,_h7)
+                _h8 -> arrayListOf(_h7,_g7,_i7)
+                _i8 -> arrayListOf(_i7,_h7,_j7)
+                _j8 -> arrayListOf(_j7,_i7)
+
                 _a7 -> arrayListOf(_a6,_a5,_b6)
                 _b7 -> arrayListOf(_b6,_b5,_a6,_c6)
                 _c7 -> arrayListOf(_c6,_c5,_b6,_d6)

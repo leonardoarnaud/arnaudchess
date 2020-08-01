@@ -7,7 +7,7 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Archer(color: Boolean) : Piece(color) {
 
-    val king = King(color)
+    val kingSpirit = King(color)
 
     override fun createImageView(context: Context): PieceImageView {
         return object : PieceImageView(context, this@Archer) {
@@ -27,14 +27,14 @@ class Archer(color: Boolean) : Piece(color) {
     }
 
     override fun canJumpWhenCapturing(): Boolean {
-        return true
+        return false
     }
 
-    override var isInvulnerable: Boolean = false
+    override var isDeadly: Boolean = false
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return arrayListOf<Int>().apply {
-            addAll(king.getLegalEndPositionsFrom(position))
+            addAll(kingSpirit.getLegalEndPositionsFrom(position))
             addAll(when (position) {
                 _a1 -> arrayListOf(_a3, _c1, _c3)
                 _a2 -> arrayListOf(_a4, _c2, _c4)

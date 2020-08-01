@@ -6,13 +6,13 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Queen(color: Boolean) : Piece(color) {
 
-    private val rook = Rook(color)
-    private val bishop = Bishop(color)
+    private val rookSpirit = Rook(color)
+    private val bishopSpirit = Bishop(color)
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return arrayListOf<Int>().apply {
-            addAll(rook.getLegalEndPositionsFrom(position))
-            addAll(bishop.getLegalEndPositionsFrom(position))
+            addAll(rookSpirit.getLegalEndPositionsFrom(position))
+            addAll(bishopSpirit.getLegalEndPositionsFrom(position))
         }
     }
 
@@ -37,5 +37,5 @@ class Queen(color: Boolean) : Piece(color) {
         return false
     }
 
-    override var isInvulnerable: Boolean = false
+    override var isDeadly: Boolean = false
 }

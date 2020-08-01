@@ -27,7 +27,7 @@ class Rook(color: Boolean) : Piece(color) {
         }
     }
 
-    override var isInvulnerable: Boolean = false
+    override var isDeadly: Boolean = false
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when (position) {

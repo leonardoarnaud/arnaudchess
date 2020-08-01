@@ -4,7 +4,7 @@ import android.content.Context
 import br.com.arnaudchess.*
 import br.com.arnaudchess.ui.PieceImageView
 
-class Knight(color: Boolean) : Piece(color) {
+open class Knight(color: Boolean) : Piece(color) {
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when (position) {
@@ -121,5 +121,5 @@ class Knight(color: Boolean) : Piece(color) {
         return true
     }
 
-    override var isInvulnerable: Boolean = false
+    override var isDeadly: Boolean = false
 }

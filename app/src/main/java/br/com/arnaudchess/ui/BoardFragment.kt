@@ -1,5 +1,6 @@
 package br.com.arnaudchess.ui
 
+import android.os.AsyncTask
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -108,14 +109,32 @@ class BoardFragment : Fragment() {
             if (!sbf.containsPiece()) return
             selectedBoardPositionFrameLayout = sbf
             sbf.select()
-            sbf.getPieceImageView()?.piece?.getLegalEndPositionsFrom(sbf.id)?.map { legalEndPosition ->
-                view?.findViewById<BoardPositionFrameLayout>(legalEndPosition)?.let { legalEndBoardPosition ->
-                    if (vm.validateMove(
-                        start = selectedBoardPositionFrameLayout!!.id,
-                        end = legalEndPosition).isValid
-                    ){
-                        legalEndBoardPosition.hint()
+            AsyncTask.execute{
+                try {
+                    val boardPositions = arrayListOf<BoardPositionFrameLayout>()
+                    sbf.getPieceImageView()?.piece?.getLegalEndPositionsFrom(sbf.id)
+                        ?.map { legalEndPosition ->
+
+                            view?.findViewById<BoardPositionFrameLayout>(legalEndPosition)
+                                ?.let { legalEndBoardPosition ->
+                                    if (vm.validateMove(
+                                            start = selectedBoardPositionFrameLayout!!.id,
+                                            end = legalEndPosition
+                                        ).isValid
+                                    ) {
+                                        boardPositions.add(legalEndBoardPosition)
+                                    }
+                                }
+                        }
+                    activity?.runOnUiThread {
+                        if (sbf.containsPiece()){
+                            boardPositions.map {
+                                it.hint()
+                            }
+                        }
                     }
+                } catch (e: Exception){
+                    e.printStackTrace()
                 }
             }
         } else {

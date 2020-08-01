@@ -122,7 +122,11 @@ class BoardViewModel : ViewModel() {
 
     fun validateMove(start: Int, end: Int): Move{
         boardConfiguration.value?.let { bc ->
-            return validateMove(start, end, bc)
+            return try {
+                validateMove(start, end, bc)
+            } catch (e: java.lang.Exception){
+                return Move(start, end, false, false)
+            }
         }
         return Move(start, end, false, false)
     }
@@ -140,24 +144,71 @@ class BoardViewModel : ViewModel() {
         val isEnemyPieceOrEmptySquare = bc[end]?.color != bc[start]?.color
         val isCapturingAndCanJumpCapturing = isCapturing && canJumpCapturing
         val isMovingAndCanJumpMoving = (isMoving && canJumpMoving)
-        val moveLeavesKingInCheck = if (isSimulation) false else verifyKingCheck(start,end,pieceAtStart?.color)
+        val isPawnAndCapturingAtFront = isPawnAndCapturingAtFront(pieceAtStart, start, end, bc)
+        val isPawnAndMovingDiagonally = isPawnAndMovingDiagonally(pieceAtStart, start, end, bc)
+        val isCapatultAndMovingLikeKnight = isCapatultAndMovingLikeKnight(pieceAtStart, start, end, bc)
+        val moveLeavesKingInCheck = if (isSimulation) false else verifyKingCheck(start, end, pieceAtStart?.color)
+        val isValidPiecePath = isPathFree
+                || (isCapturingAndCanJumpCapturing && !isPathFree)
+                || (isMovingAndCanJumpMoving && !isPathFree)
+        val isValid = isPieceLegalMove
+                && isValidPiecePath
+                && isEnemyPieceOrEmptySquare
+                && !isPawnAndCapturingAtFront
+                && !isPawnAndMovingDiagonally
+                && !isCapatultAndMovingLikeKnight
+                && !moveLeavesKingInCheck
+        return Move(start, end, isValid, isKnightCapturing)
 
-        val isPawnAndCapturingAtFront = try {
+    }
+
+    private fun isCapatultAndMovingLikeKnight(
+        pieceAtStart: Piece?,
+        start: Int,
+        end: Int,
+        bc: java.util.HashMap<Int, Piece>
+    ): Boolean {
+        return try {
+            val knightMove = (pieceAtStart as Catapult)
+                .knightSpirit
+                .getLegalEndPositionsFrom(start)
+                .singleOrNull{
+                    it == end
+                }
+            val knightMoveToEmptyPosition = knightMove != null && bc[knightMove] == null
+            knightMoveToEmptyPosition
+        } catch (e: java.lang.Exception){
+            false
+        }
+    }
+
+    private fun isPawnAndMovingDiagonally(
+        pieceAtStart: Piece?,
+        start: Int,
+        end: Int,
+        bc: java.util.HashMap<Int, Piece>
+    ): Boolean {
+        return try {
+            val diagonalPositions = (pieceAtStart as Pawn).getDiagonalPositions(start)
+            var isDiagonal = false
+            diagonalPositions.map {
+                val enable = it == end && bc[it] == null
+                isDiagonal = isDiagonal || enable
+            }
+            isDiagonal
+        } catch (e: Exception){
+            false
+        }
+    }
+
+    private fun isPawnAndCapturingAtFront(pieceAtStart: Piece?, start: Int, end: Int, bc: HashMap<Int,Piece>): Boolean {
+        return try {
             (pieceAtStart as Pawn).getFrontPositions(start).singleOrNull{
                 bc[it] != null
             } == end
         } catch (e: Exception){
             false
         }
-
-        val isValidPiecePath = isCapturingAndCanJumpCapturing || isMovingAndCanJumpMoving || isPathFree
-        val isValid = isPieceLegalMove
-                && isValidPiecePath
-                && isEnemyPieceOrEmptySquare
-                && !isPawnAndCapturingAtFront
-                && !moveLeavesKingInCheck
-        return Move(start, end, isValid, isKnightCapturing)
-
     }
 
     private fun verifyKingCheck(start: Int, end: Int, startPieceColor: Boolean?): Boolean {
@@ -200,15 +251,45 @@ class BoardViewModel : ViewModel() {
         return boardConfiguration.value!!
     }
 
-    private fun movePiece(start: Int, end: Int, bc: HashMap<Int, Piece>, isSimulation: Boolean, isKnightCapturing: Boolean): HashMap<Int,Piece> {
-        bc[end]?.let { if (!isSimulation) capturedPieces.add(it) }
+    private fun movePiece(
+        start: Int,
+        end: Int,
+        bc: HashMap<Int, Piece>,
+        isSimulation: Boolean,
+        isKnightCapturing: Boolean
+    ): HashMap<Int,Piece> {
+        var lastPieceCaptured: Piece? = null
+        bc[end]?.let {
+            if (!isSimulation) capturedPieces.add(it)
+            lastPieceCaptured = it
+        }
         bc[end] = bc[start]!!
         bc.remove(start)
+
         if (isKnightCapturing){
             val color = bc[end]!!.color
             bc[start] = Pawn(color, if (color == WHITE) whiteDirection else blackDirection)
         }
+        bc[end]?.isDeadly = (bc[end] is Ninja && getSquareColor(end) == BLACK_SQUARE)
+                    || (bc[end] is Viking && getSquareColor(end) == WHITE_SQUARE)
+        if (lastPieceCaptured?.isDeadly == true){
+            if (!isSimulation) capturedPieces.add(lastPieceCaptured!!)
+            bc.remove(end)
+        }
         return bc
+    }
+
+    private fun getSquareColor(position: Int): Boolean {
+        return arrayListOf(
+            _b1, _d1, _f1, _h1, _j1,
+            _a2, _c2, _e2, _f2, _i2,
+            _b3, _d3, _f3, _h3, _j3,
+            _a4, _c4, _e4, _f4, _i4,
+            _b5, _d5, _f5, _h5, _j5,
+            _a6, _c6, _e6, _f6, _i6,
+            _b7, _d7, _f7, _h7, _j7,
+            _a8, _c8, _e8, _f8, _i8
+        ).contains(position)
     }
 
     private fun getPiecesBetween(start: Int, end: Int): ArrayList<Piece> {
@@ -260,5 +341,10 @@ class BoardViewModel : ViewModel() {
 
         }
 
+    }
+
+    companion object{
+        const val WHITE_SQUARE = true
+        const val BLACK_SQUARE = false
     }
 }
