@@ -29,6 +29,8 @@ class King(color: Boolean) : Piece(color) {
 
     override var isDeadly: Boolean = false
 
+    override var isMoved: Boolean = false
+
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when (position){
             _a1 -> arrayListOf(_a2,_b1,_b2)
@@ -76,14 +78,18 @@ class King(color: Boolean) : Piece(color) {
             _e7 -> arrayListOf(_d6,_d7,_d8,_e8,_f8,_f7,_f6,_e6)
             _e8 -> arrayListOf(_d7,_d8,_f7,_e7,_f8)
 
-            _f1 -> arrayListOf(_e1,_e2,_f2,_g2,_g1)
+            _f1 -> arrayListOf(_e1,_e2,_f2,_g2,_g1).apply {
+                if (!isMoved) addAll(arrayListOf(_i1,_c1))
+            }
             _f2 -> arrayListOf(_e1,_e2,_e3,_f3,_g3,_g2,_g1,_f1)
             _f3 -> arrayListOf(_e2,_e3,_e4,_f4,_g4,_g3,_g2,_f2)
             _f4 -> arrayListOf(_e3,_e4,_e5,_f5,_g5,_g4,_g3,_f3)
             _f5 -> arrayListOf(_e4,_e5,_e6,_f6,_g6,_g5,_g4,_f4)
             _f6 -> arrayListOf(_e5,_e6,_e7,_f7,_g7,_g6,_g5,_f5)
             _f7 -> arrayListOf(_e6,_e7,_e8,_f8,_g8,_g7,_g6,_f6)
-            _f8 -> arrayListOf(_e7,_e8,_g8,_g7,_f7)
+            _f8 -> arrayListOf(_e7,_e8,_g8,_g7,_f7).apply {
+                if (!isMoved) addAll(arrayListOf(_i8,_c8))
+            }
 
             _g1 -> arrayListOf(_f1,_f2,_g2,_h2,_h1)
             _g2 -> arrayListOf(_f1,_f2,_f3,_g3,_h3,_h2,_h1,_g1)

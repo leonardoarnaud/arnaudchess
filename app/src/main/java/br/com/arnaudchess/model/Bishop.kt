@@ -29,6 +29,8 @@ class Bishop(color: Boolean) : Piece(color) {
 
     override var isDeadly: Boolean = false
 
+    override var isMoved: Boolean = false
+
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when (position) {
             _a2 -> arrayListOf(_b1, _b3, _c4, _d5, _e6, _f7, _g8)

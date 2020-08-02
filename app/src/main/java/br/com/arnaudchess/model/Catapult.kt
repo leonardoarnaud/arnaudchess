@@ -31,6 +31,8 @@ class Catapult(color: Boolean) : Piece(color) {
 
     override var isDeadly: Boolean = false
 
+    override var isMoved: Boolean = false
+
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when(position){
             _a1 -> arrayListOf(_a2,_b2,_a3,_b3,_c3)

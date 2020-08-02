@@ -122,4 +122,6 @@ open class Knight(color: Boolean) : Piece(color) {
     }
 
     override var isDeadly: Boolean = false
+
+    override var isMoved: Boolean = false
 }

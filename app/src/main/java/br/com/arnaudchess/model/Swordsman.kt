@@ -32,6 +32,8 @@ open class Swordsman(
 
     override var isDeadly: Boolean = false
 
+    override var isMoved: Boolean = false
+
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when(direction){
             UP -> when (position){

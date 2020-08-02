@@ -32,6 +32,8 @@ class Archer(color: Boolean) : Piece(color) {
 
     override var isDeadly: Boolean = false
 
+    override var isMoved: Boolean = false
+
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return arrayListOf<Int>().apply {
             addAll(kingSpirit.getLegalEndPositionsFrom(position))

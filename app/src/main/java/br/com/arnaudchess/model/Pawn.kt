@@ -304,4 +304,5 @@ class Pawn(color: Boolean, override val direction: Boolean) : Swordsman(color, d
             else -> arrayListOf()
         }
     }
+
 }

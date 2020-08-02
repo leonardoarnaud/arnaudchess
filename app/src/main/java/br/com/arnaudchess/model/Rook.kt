@@ -29,6 +29,8 @@ class Rook(color: Boolean) : Piece(color) {
 
     override var isDeadly: Boolean = false
 
+    override var isMoved: Boolean = false
+
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return when (position) {
             _a1 -> arrayListOf(_a2, _a3, _a4, _a5, _a6, _a7, _a8, _b1, _c1, _d1, _e1, _f1, _g1, _h1,_i1,_j1)

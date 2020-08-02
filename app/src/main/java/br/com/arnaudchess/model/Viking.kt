@@ -38,5 +38,5 @@ class Viking : Knight(true) {
 
     override var isDeadly: Boolean = false
 
-
+    override var isMoved: Boolean = false
 }

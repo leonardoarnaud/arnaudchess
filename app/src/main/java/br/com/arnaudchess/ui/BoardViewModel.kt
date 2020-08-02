@@ -67,6 +67,9 @@ class BoardViewModel : ViewModel() {
         add(arrayListOf(_j7, _i8))
     }
 
+    val topBoardPositions = arrayListOf(_a8, _b8, _c8, _d8, _e8, _f8, _g8, _h8, _i8, _j8)
+    val bottomBoardPositions = arrayListOf(_a1, _b1, _c1, _d1, _e1, _f1, _g1, _h1, _i1, _j1)
+
     val capturedPieces = ArrayList<Piece>()
     var whiteDirection = false
     var blackDirection = false
@@ -74,6 +77,7 @@ class BoardViewModel : ViewModel() {
     fun startWhite() {
         whiteDirection = UP
         blackDirection = DOWN
+
         boardConfiguration.postValue(HashMap<Int, Piece>().apply {
             put(_a1, Rook(WHITE))
             put(_b1, Catapult(WHITE))
@@ -146,19 +150,71 @@ class BoardViewModel : ViewModel() {
         val isPawnAndCapturingAtFront = isPawnAndCapturingAtFront(pieceAtStart, start, end, bc)
         val isPawnAndMovingDiagonally = isPawnAndMovingDiagonally(pieceAtStart, start, end, bc)
         val isCapatultAndMovingLikeKnight = isCapatultAndMovingLikeKnight(pieceAtStart, start, end, bc)
-        val moveLeavesKingInCheck = if (isSimulation) false else verifyKingCheck(start, end, pieceAtStart?.color)
+        val isMovingKing = pieceAtStart is King
+        val isKingCapturingDeadlyPeace = isMovingKing && bc[end]?.isDeadly == true
+        val pieceOnKingStartPosition = start == _f1 || start == _f8
+        val isCastleEndPosition = isCastleEndPosition(end)
+        val isKingTryingCastle = !isSimulation && isMovingKing && pieceOnKingStartPosition && isCastleEndPosition
+        val isValidCastleMove = if (isSimulation || !isKingTryingCastle || kingIsInCheck(bc, pieceAtStart?.color) ) false else
+            isPathFree && isPossibleCastleMove(bc, start, end, pieceAtStart?.color)
+
+        val moveLeavesKingInCheck = if (isSimulation || isValidCastleMove) false else simulateMoveAndVerifyKingCheck(start, end, pieceAtStart?.color)
+
         val isValidPiecePath = isPathFree
                 || (isCapturingAndCanJumpCapturing && !isPathFree)
                 || (isMovingAndCanJumpMoving && !isPathFree)
+
         val isValid = isPieceLegalMove
                 && isValidPiecePath
                 && isEnemyPieceOrEmptySquare
                 && !isPawnAndCapturingAtFront
                 && !isPawnAndMovingDiagonally
                 && !isCapatultAndMovingLikeKnight
+                && !isKingCapturingDeadlyPeace
                 && !moveLeavesKingInCheck
+                && !(isKingTryingCastle && !isValidCastleMove)
         return Move(start, end, isValid)
+    }
 
+    private fun isPossibleCastleMove(
+        bc: HashMap<Int, Piece>,
+        start: Int,
+        end: Int,
+        color: Boolean?
+    ): Boolean {
+        return (
+                start == _f1 &&
+                        end == _i1 &&
+                        bc[_j1] is Rook &&
+                        bc[_j1]?.isMoved == false &&
+                        !simulateMoveAndVerifyKingCheck(start, _g1, color) &&
+                        !simulateMoveAndVerifyKingCheck(start, _h1, color)
+                ) || (
+                start == _f1 &&
+                        end == _c1 &&
+                        bc[_a1] is Rook &&
+                        bc[_a1]?.isMoved == false &&
+                        !simulateMoveAndVerifyKingCheck(start, _e1, color) &&
+                        !simulateMoveAndVerifyKingCheck(start, _d1, color)
+                ) || (
+                start == _f8 &&
+                        end == _i8 &&
+                        bc[_j8] is Rook &&
+                        bc[_j8]?.isMoved == false &&
+                        !simulateMoveAndVerifyKingCheck(start, _g8, color) &&
+                        !simulateMoveAndVerifyKingCheck(start, _h8, color)
+                ) || (
+                start == _f8 &&
+                        end == _c8 &&
+                        bc[_a8] is Rook &&
+                        bc[_a8]?.isMoved == false &&
+                        !simulateMoveAndVerifyKingCheck(start, _e8, color) &&
+                        !simulateMoveAndVerifyKingCheck(start, _d8, color)
+                )
+    }
+
+    private fun isCastleEndPosition(end: Int): Boolean {
+        return end == _c1 || end == _i1 || end == _c8 || end == _i8
     }
 
     private fun isCapatultAndMovingLikeKnight(
@@ -210,30 +266,27 @@ class BoardViewModel : ViewModel() {
         }
     }
 
-    private fun verifyKingCheck(start: Int, end: Int, startPieceColor: Boolean?): Boolean {
+    private fun simulateMoveAndVerifyKingCheck(start: Int, end: Int, startPieceColor: Boolean?): Boolean {
         Log.i("ARNAUD","SIMULAÇÃO INICIADA")
         val newBc = HashMap<Int, Piece>()
         boardConfiguration.value?.map { newBc.put(it.key, it.value) }
 
         movePiece(start, end, newBc, true)
 
-        newBc.filterValues {
-            it.color != startPieceColor
+        return kingIsInCheck(newBc, startPieceColor)
+    }
+
+    private fun kingIsInCheck(bc: HashMap<Int, Piece>, color: Boolean?): Boolean{
+        bc.filterValues {
+            it.color != color
         }.map { enemyPiece ->
             val positions = enemyPiece.value.getLegalEndPositionsFrom(enemyPiece.key)
             positions.map { pos ->
-                if (validateMove(enemyPiece.key, pos, newBc, true).isValid) {
-                    val foundKingAsPossibleEnemyMove = newBc[pos] is King
+                if (validateMove(enemyPiece.key, pos, bc, true).isValid) {
+                    val foundKingAsPossibleEnemyMove = bc[pos] is King
                     if (foundKingAsPossibleEnemyMove) {
-                        Log.i("ARNAUD", "ACHOU REI")
-                        val pieceIsSameColor = newBc[pos]?.color == startPieceColor
+                        val pieceIsSameColor = bc[pos]?.color == color
                         if (pieceIsSameColor) {
-                            Log.i("ARNAUD", "ACHOU REI DE MESMA COR")
-                            if (newBc[_e2] != null){
-                                Log.i("ARNAUD","ACHOU PEÇA EM E2")
-                            } else {
-                                Log.i("ARNAUD","NÃO ACHOU PEÇA EM E2")
-                            }
                             return true
                         }
                     }
@@ -248,6 +301,14 @@ class BoardViewModel : ViewModel() {
             return movePiece(start, end, bc, false)
         }
         return boardConfiguration.value!!
+    }
+
+    private fun forcePieceMove(start: Int, end: Int, bc: HashMap<Int, Piece>, isSimulation: Boolean){
+        bc[end] = bc[start]!!
+        bc.remove(start)
+        if (!isSimulation){
+            bc[end]?.isMoved = true
+        }
     }
 
     private fun movePiece(
@@ -269,37 +330,68 @@ class BoardViewModel : ViewModel() {
         bc[end] = bc[start]!!
         bc.remove(start)
 
+        if (bc[end] is King && isCastleEndPosition(end) && bc[end]?.isMoved == false){
+            when (end){
+                _c1 -> forcePieceMove(_a1, _d1, bc, isSimulation)
+                _i1 -> forcePieceMove(_j1, _h1, bc, isSimulation)
+                _c8 -> forcePieceMove(_a8, _d8, bc, isSimulation)
+                _i8 -> forcePieceMove(_j8, _h8, bc, isSimulation)
+            }
+        }
+
+        if (!isSimulation){
+            bc[end]?.isMoved = true
+        }
         if (isKnightCapturing){
             val color = bc[end]!!.color
             bc[start] = Pawn(color, if (color == WHITE) whiteDirection else blackDirection)
         }
 
-        if (isPawnCapturing){
-            val color = bc[end]!!.color
-            bc[end] = Swordsman(color, if (color == WHITE) whiteDirection else blackDirection)
-        } else if (isSwordsmanCapturing && lastPieceCaptured !is Swordsman){
-            bc[end] = lastPieceCaptured!!.clone().apply { color = !lastPieceCaptured!!.color }
+        var successHeroPromotion = false
+        topBoardPositions.singleOrNull{
+            (bc[it] is Swordsman && (bc[it] as Swordsman).direction == UP)
+        }?.let {
+            bc[it] = if (bc[it]!!.color == WHITE) Viking() else Ninja()
+            successHeroPromotion = true
+        }
+
+        bottomBoardPositions.singleOrNull{
+            (bc[it] is Swordsman && (bc[it] as Swordsman).direction == DOWN)
+        }?.let {
+            bc[it] = if (bc[it]!!.color == WHITE) Viking() else Ninja()
+            successHeroPromotion = true
+        }
+
+        if (!successHeroPromotion) {
+            if (isPawnCapturing) {
+                val color = bc[end]!!.color
+                bc[end] = Swordsman(color, if (color == WHITE) whiteDirection else blackDirection)
+            } else if (isSwordsmanCapturing && lastPieceCaptured !is Swordsman) {
+                bc[end] = lastPieceCaptured!!.clone().apply { color = !lastPieceCaptured!!.color }
+            }
         }
 
         bc[end]?.isDeadly = (bc[end] is Ninja && getSquareColor(end) == BLACK_SQUARE)
                     || (bc[end] is Viking && getSquareColor(end) == WHITE_SQUARE)
+
         if (lastPieceCaptured?.isDeadly == true){
             if (!isSimulation) capturedPieces.add(lastPieceCaptured!!)
             bc.remove(end)
         }
+
         return bc
     }
 
     private fun getSquareColor(position: Int): Boolean {
         return arrayListOf(
             _b1, _d1, _f1, _h1, _j1,
-            _a2, _c2, _e2, _f2, _i2,
+            _a2, _c2, _e2, _g2, _i2,
             _b3, _d3, _f3, _h3, _j3,
-            _a4, _c4, _e4, _f4, _i4,
+            _a4, _c4, _e4, _g4, _i4,
             _b5, _d5, _f5, _h5, _j5,
-            _a6, _c6, _e6, _f6, _i6,
+            _a6, _c6, _e6, _g6, _i6,
             _b7, _d7, _f7, _h7, _j7,
-            _a8, _c8, _e8, _f8, _i8
+            _a8, _c8, _e8, _g8, _i8
         ).contains(position)
     }
 

@@ -11,6 +11,7 @@ abstract class Piece(
     abstract fun canJumpWhileMoving(): Boolean
     abstract fun canJumpWhenCapturing(): Boolean
     abstract var isDeadly: Boolean
+    abstract var isMoved: Boolean
 
     public override fun clone(): Piece {
         return super.clone() as Piece

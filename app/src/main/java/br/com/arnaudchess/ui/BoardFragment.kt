@@ -62,6 +62,7 @@ class BoardFragment : Fragment() {
         vm.boardConfiguration.observe(viewLifecycleOwner, Observer {
             it?.let {
                 clearBoard()
+                clearBorders()
                 putPiecesOnBoard(it)
             }
         })

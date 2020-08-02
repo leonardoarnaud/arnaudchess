@@ -37,4 +37,6 @@ class Ninja : Knight(false) {
     }
 
     override var isDeadly: Boolean = false
+
+    override var isMoved: Boolean = false
 }
