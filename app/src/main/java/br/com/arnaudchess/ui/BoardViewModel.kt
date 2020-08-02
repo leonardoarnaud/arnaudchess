@@ -125,17 +125,16 @@ class BoardViewModel : ViewModel() {
             return try {
                 validateMove(start, end, bc)
             } catch (e: java.lang.Exception){
-                return Move(start, end, false, false)
+                return Move(start, end, false)
             }
         }
-        return Move(start, end, false, false)
+        return Move(start, end, false)
     }
 
     private fun validateMove(start: Int, end: Int, bc: HashMap<Int, Piece>, isSimulation: Boolean = false): Move {
         val pieceAtStart = bc[start]
         val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
         val isCapturing = bc[end] != null
-        val isKnightCapturing = pieceAtStart is Knight && isCapturing
         val isMoving = bc[end] == null
         val isPieceLegalMove = legalPositions?.contains(end) == true
         val canJumpCapturing = pieceAtStart?.canJumpWhenCapturing() == true
@@ -158,7 +157,7 @@ class BoardViewModel : ViewModel() {
                 && !isPawnAndMovingDiagonally
                 && !isCapatultAndMovingLikeKnight
                 && !moveLeavesKingInCheck
-        return Move(start, end, isValid, isKnightCapturing)
+        return Move(start, end, isValid)
 
     }
 
@@ -215,8 +214,8 @@ class BoardViewModel : ViewModel() {
         Log.i("ARNAUD","SIMULAÇÃO INICIADA")
         val newBc = HashMap<Int, Piece>()
         boardConfiguration.value?.map { newBc.put(it.key, it.value) }
-        val isKnightCapturing = newBc[start] is Knight && newBc[end] != null && newBc[end]!!.color != newBc[start]!!.color
-        movePiece(start, end, newBc, true, isKnightCapturing)
+
+        movePiece(start, end, newBc, true)
 
         newBc.filterValues {
             it.color != startPieceColor
@@ -244,9 +243,9 @@ class BoardViewModel : ViewModel() {
         return false
     }
 
-    fun movePiece(start: Int, end: Int, isKnightCapturing: Boolean): HashMap<Int,Piece> {
+    fun movePiece(start: Int, end: Int): HashMap<Int,Piece> {
         boardConfiguration.value?.let { bc ->
-            return movePiece(start, end, bc, false, isKnightCapturing)
+            return movePiece(start, end, bc, false)
         }
         return boardConfiguration.value!!
     }
@@ -255,10 +254,14 @@ class BoardViewModel : ViewModel() {
         start: Int,
         end: Int,
         bc: HashMap<Int, Piece>,
-        isSimulation: Boolean,
-        isKnightCapturing: Boolean
+        isSimulation: Boolean
     ): HashMap<Int,Piece> {
         var lastPieceCaptured: Piece? = null
+        val isCapturing = bc[end] != null && bc[end]!!.color != bc[start]!!.color
+        val isKnightCapturing = bc[start] is Knight && isCapturing
+        val isPawnCapturing = bc[start] is Pawn && isCapturing
+        val isSwordsmanCapturing = bc[start] is Swordsman && isCapturing
+
         bc[end]?.let {
             if (!isSimulation) capturedPieces.add(it)
             lastPieceCaptured = it
@@ -270,6 +273,14 @@ class BoardViewModel : ViewModel() {
             val color = bc[end]!!.color
             bc[start] = Pawn(color, if (color == WHITE) whiteDirection else blackDirection)
         }
+
+        if (isPawnCapturing){
+            val color = bc[end]!!.color
+            bc[end] = Swordsman(color, if (color == WHITE) whiteDirection else blackDirection)
+        } else if (isSwordsmanCapturing && lastPieceCaptured !is Swordsman){
+            bc[end] = lastPieceCaptured!!.clone().apply { color = !lastPieceCaptured!!.color }
+        }
+
         bc[end]?.isDeadly = (bc[end] is Ninja && getSquareColor(end) == BLACK_SQUARE)
                     || (bc[end] is Viking && getSquareColor(end) == WHITE_SQUARE)
         if (lastPieceCaptured?.isDeadly == true){
@@ -327,13 +338,12 @@ class BoardViewModel : ViewModel() {
     inner class Move(
         val start: Int,
         val end: Int,
-        val isValid: Boolean,
-        val isKnightCapturing: Boolean
+        val isValid: Boolean
     ){
 
         fun execute(){
             if (isValid){
-                boardConfiguration.value = movePiece(start, end, isKnightCapturing)
+                boardConfiguration.value = movePiece(start, end)
 
             } else {
                 message.postValue(R.string.illegal_move)
