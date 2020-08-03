@@ -342,7 +342,7 @@ class BoardViewModel : ViewModel() {
         if (!isSimulation){
             bc[end]?.isMoved = true
         }
-        if (isKnightCapturing){
+        if (isKnightCapturing && lastPieceCaptured?.isDeadly == false){
             val color = bc[end]!!.color
             bc[start] = Pawn(color, if (color == WHITE) whiteDirection else blackDirection)
         }
