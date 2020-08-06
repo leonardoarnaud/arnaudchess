@@ -12,6 +12,10 @@ import br.com.arnaudchess.model.Piece.Companion.WHITE
 
 class BoardViewModel : ViewModel() {
 
+    private var simulatedEnPassantCapturePosition: Int = 0
+    private var simulatedEnPassantMovePosition: Int = 0
+    private var enPassantCapturePosition: Int = 0
+    private var enPassantMovePosition = 0
     val boardConfiguration = MutableLiveData<HashMap<Int, Piece>>()
     val message = MutableLiveData<Int>()
 
@@ -158,7 +162,11 @@ class BoardViewModel : ViewModel() {
         val isValidCastleMove = if (isSimulation || !isKingTryingCastle || kingIsInCheck(bc, pieceAtStart?.color) ) false else
             isPathFree && isPossibleCastleMove(bc, start, end, pieceAtStart?.color)
 
-        val moveLeavesKingInCheck = if (isSimulation || isValidCastleMove) false else simulateMoveAndVerifyKingCheck(start, end, pieceAtStart?.color)
+        val b = isSimulation || isValidCastleMove
+        var moveLeavesKingInCheck = false
+        if (!b){
+            moveLeavesKingInCheck = simulateMoveAndVerifyKingCheck(start, end, pieceAtStart?.color)
+        }
 
         val isValidPiecePath = isPathFree
                 || (isCapturingAndCanJumpCapturing && !isPathFree)
@@ -168,7 +176,7 @@ class BoardViewModel : ViewModel() {
                 && isValidPiecePath
                 && isEnemyPieceOrEmptySquare
                 && !isPawnAndCapturingAtFront
-                && !isPawnAndMovingDiagonally
+                && !((isPawnAndMovingDiagonally) && end != enPassantMovePosition)
                 && !isCapatultAndMovingLikeKnight
                 && !isKingCapturingDeadlyPeace
                 && !moveLeavesKingInCheck
@@ -269,7 +277,10 @@ class BoardViewModel : ViewModel() {
     private fun simulateMoveAndVerifyKingCheck(start: Int, end: Int, startPieceColor: Boolean?): Boolean {
         Log.i("ARNAUD","SIMULAÇÃO INICIADA")
         val newBc = HashMap<Int, Piece>()
-        boardConfiguration.value?.map { newBc.put(it.key, it.value) }
+        val originalBoardConfiguration = boardConfiguration.value ?: HashMap()
+        originalBoardConfiguration.map {
+            newBc.put(it.key, it.value)
+        }
 
         movePiece(start, end, newBc, true)
 
@@ -320,8 +331,21 @@ class BoardViewModel : ViewModel() {
         var lastPieceCaptured: Piece? = null
         val isCapturing = bc[end] != null && bc[end]!!.color != bc[start]!!.color
         val isKnightCapturing = bc[start] is Knight && isCapturing
-        val isPawnCapturing = bc[start] is Pawn && isCapturing
-        val isSwordsmanCapturing = bc[start] is Swordsman && isCapturing
+        val isEnpassantCapturing = end == enPassantMovePosition && bc[start]?.color != bc[enPassantCapturePosition]?.color
+        val isPawnCapturing = bc[start] is Pawn && (isCapturing || isEnpassantCapturing)
+        val isSwordsmanCapturing = bc[start] is Swordsman && (isCapturing || isEnpassantCapturing)
+        val isPawnDoubleMoving = isPawnDoubleMoving(bc, start, end) && bc[end]?.isDeadly != true
+
+
+        if (isPawnDoubleMoving){
+            if (isSimulation){
+                simulatedEnPassantMovePosition = getEnpassantMovePosition(end)
+                simulatedEnPassantCapturePosition = end
+            } else {
+                enPassantMovePosition = getEnpassantMovePosition(end)
+                enPassantCapturePosition = end
+            }
+        }
 
         bc[end]?.let {
             if (!isSimulation) capturedPieces.add(it)
@@ -329,6 +353,26 @@ class BoardViewModel : ViewModel() {
         }
         bc[end] = bc[start]!!
         bc.remove(start)
+
+        if (isEnpassantCapturing){
+            if (!isSimulation) {
+                bc[enPassantCapturePosition]?.let {
+                    capturedPieces.add(it)
+                    lastPieceCaptured = it
+                }
+                bc.remove(enPassantCapturePosition)
+            }
+        }
+
+        if (!isPawnDoubleMoving && !isEnpassantCapturing){
+            if (isSimulation){
+                simulatedEnPassantMovePosition = 0
+                simulatedEnPassantCapturePosition = 0
+            } else {
+                enPassantMovePosition = 0
+                enPassantCapturePosition = 0
+            }
+        }
 
         if (bc[end] is King && isCastleEndPosition(end) && bc[end]?.isMoved == false){
             when (end){
@@ -366,8 +410,14 @@ class BoardViewModel : ViewModel() {
             if (isPawnCapturing) {
                 val color = bc[end]!!.color
                 bc[end] = Swordsman(color, if (color == WHITE) whiteDirection else blackDirection)
-            } else if (isSwordsmanCapturing && lastPieceCaptured !is Swordsman) {
-                bc[end] = lastPieceCaptured!!.clone().apply { color = !lastPieceCaptured!!.color }
+            } else if (isSwordsmanCapturing && lastPieceCaptured != null && lastPieceCaptured !is Swordsman) {
+                bc[end] = when (lastPieceCaptured) {
+                    is Viking -> Ninja().apply { isDeadly = !lastPieceCaptured!!.isDeadly }
+                    is Ninja -> Viking().apply { isDeadly = !lastPieceCaptured!!.isDeadly }
+                    else -> lastPieceCaptured!!.clone().apply {
+                        color = !lastPieceCaptured!!.color
+                    }
+                }
             }
         }
 
@@ -380,6 +430,58 @@ class BoardViewModel : ViewModel() {
         }
 
         return bc
+    }
+
+
+    private fun getEnpassantMovePosition(end: Int): Int {
+        return when (end){
+            _a4 -> _a3
+            _b4 -> _b3
+            _c4 -> _c3
+            _d4 -> _d3
+            _e4 -> _e3
+            _f4 -> _f3
+            _g4 -> _g3
+            _h4 -> _h3
+            _i4 -> _i3
+            _j4 -> _j3
+            _a5 -> _a6
+            _b5 -> _b6
+            _c5 -> _c6
+            _d5 -> _d6
+            _e5 -> _e6
+            _f5 -> _f6
+            _g5 -> _g6
+            _h5 -> _h6
+            _i5 -> _i6
+            _j5 -> _j6
+            else -> 0
+        }
+    }
+
+    private fun isPawnDoubleMoving(bc: HashMap<Int, Piece>, start: Int, end: Int): Boolean {
+        return bc[start] is Swordsman && (
+                (start == _a2 && end == _a4) ||
+                (start == _b2 && end == _b4) ||
+                (start == _c2 && end == _c4) ||
+                (start == _d2 && end == _d4) ||
+                (start == _e2 && end == _e4) ||
+                (start == _f2 && end == _f4) ||
+                (start == _g2 && end == _g4) ||
+                (start == _h2 && end == _h4) ||
+                (start == _i2 && end == _i4) ||
+                (start == _j2 && end == _j4) ||
+                (start == _a7 && end == _a5) ||
+                (start == _b7 && end == _b5) ||
+                (start == _c7 && end == _c5) ||
+                (start == _d7 && end == _d5) ||
+                (start == _e7 && end == _e5) ||
+                (start == _f7 && end == _f5) ||
+                (start == _g7 && end == _g5) ||
+                (start == _h7 && end == _h5) ||
+                (start == _i7 && end == _i5) ||
+                (start == _j7 && end == _j5)
+        )
     }
 
     private fun getSquareColor(position: Int): Boolean {

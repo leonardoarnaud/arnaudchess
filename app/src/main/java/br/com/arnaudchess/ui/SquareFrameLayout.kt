@@ -16,9 +16,6 @@ class SquareFrameLayout : FrameLayout {
     ) : super(context, attrs, defStyleAttr)
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        super.onMeasure(
-            (heightMeasureSpec + heightMeasureSpec * 0.00000025).toInt(),
-            heightMeasureSpec
-        )
+        super.onMeasure(heightMeasureSpec, heightMeasureSpec)
     }
 }
