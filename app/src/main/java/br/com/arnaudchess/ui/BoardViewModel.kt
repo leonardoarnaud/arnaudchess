@@ -74,6 +74,20 @@ class BoardViewModel : ViewModel() {
     val topBoardPositions = arrayListOf(_a8, _b8, _c8, _d8, _e8, _f8, _g8, _h8, _i8, _j8)
     val bottomBoardPositions = arrayListOf(_a1, _b1, _c1, _d1, _e1, _f1, _g1, _h1, _i1, _j1)
 
+    val topSideBoardPositions = arrayListOf(
+        _a8, _b8, _c8, _d8, _e8, _f8, _g8, _h8, _i8, _j8,
+        _a7, _b7, _c7, _d7, _e7, _f7, _g7, _h7, _i7, _j7,
+        _a6, _b6, _c6, _d6, _e6, _f6, _g6, _h6, _i6, _j6,
+        _a5, _b5, _c5, _d5, _e5, _f5, _g5, _h5, _i5, _j5
+    )
+
+    val bottomSideBoardPositions = arrayListOf(
+        _a1, _b1, _c1, _d1, _e1, _f1, _g1, _h1, _i1, _j1,
+        _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2,
+        _a3, _b3, _c3, _d3, _e3, _f3, _g3, _h3, _i3, _j3,
+        _a4, _b4, _c4, _d4, _e4, _f4, _g4, _h4, _i4, _j4
+    )
+
     val capturedPieces = ArrayList<Piece>()
     var whiteDirection = false
     var blackDirection = false
@@ -279,7 +293,7 @@ class BoardViewModel : ViewModel() {
         val newBc = HashMap<Int, Piece>()
         val originalBoardConfiguration = boardConfiguration.value ?: HashMap()
         originalBoardConfiguration.map {
-            newBc.put(it.key, it.value)
+            newBc.put(it.key, it.value.clone())
         }
 
         movePiece(start, end, newBc, true)
@@ -383,10 +397,8 @@ class BoardViewModel : ViewModel() {
             }
         }
 
-        if (!isSimulation){
-            bc[end]?.isMoved = true
-        }
-        if (isKnightCapturing && lastPieceCaptured?.isDeadly == false){
+        bc[end]?.isMoved = true
+        if (isKnightCapturing && lastPieceCaptured?.isDeadly == false && isFromYourBoardSide(start, bc[end]!!.color)){
             val color = bc[end]!!.color
             bc[start] = Pawn(color, if (color == WHITE) whiteDirection else blackDirection)
         }
@@ -412,8 +424,8 @@ class BoardViewModel : ViewModel() {
                 bc[end] = Swordsman(color, if (color == WHITE) whiteDirection else blackDirection)
             } else if (isSwordsmanCapturing && lastPieceCaptured != null && lastPieceCaptured !is Swordsman) {
                 bc[end] = when (lastPieceCaptured) {
-                    is Viking -> Ninja().apply { isDeadly = !lastPieceCaptured!!.isDeadly }
-                    is Ninja -> Viking().apply { isDeadly = !lastPieceCaptured!!.isDeadly }
+                    is Viking -> Ninja().apply { setDeadlyPiece(!lastPieceCaptured!!.isDeadly) }
+                    is Ninja -> Viking().apply { setDeadlyPiece(!lastPieceCaptured!!.isDeadly) }
                     else -> lastPieceCaptured!!.clone().apply {
                         color = !lastPieceCaptured!!.color
                     }
@@ -421,15 +433,25 @@ class BoardViewModel : ViewModel() {
             }
         }
 
-        bc[end]?.isDeadly = (bc[end] is Ninja && getSquareColor(end) == BLACK_SQUARE)
-                    || (bc[end] is Viking && getSquareColor(end) == WHITE_SQUARE)
+        bc[end]?.setDeadlyPiece(if (bc[end] is King) false else
+                    (bc[end] is Ninja && getSquareColor(end) == BLACK_SQUARE) ||
+                    (bc[end] is Viking && getSquareColor(end) == WHITE_SQUARE) ||
+                    (bc[end]?.color == WHITE && getSquareColor(end) == WHITE_SQUARE && isFromYourBoardSide(end, WHITE)) ||
+                    (bc[end]?.color == BLACK && getSquareColor(end) == BLACK_SQUARE && isFromYourBoardSide(end, BLACK)))
 
         if (lastPieceCaptured?.isDeadly == true){
             if (!isSimulation) capturedPieces.add(lastPieceCaptured!!)
             bc.remove(end)
         }
 
+
         return bc
+    }
+
+    private fun isFromYourBoardSide(position: Int, color: Boolean): Boolean {
+        val direction = if (color == WHITE) whiteDirection else blackDirection
+        val sidePositions = if (direction == UP) bottomSideBoardPositions else topSideBoardPositions
+        return sidePositions.contains(position)
     }
 
 

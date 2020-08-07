@@ -27,7 +27,9 @@ class Rook(color: Boolean) : Piece(color) {
         }
     }
 
-    override var isDeadly: Boolean = false
+    override fun setDeadlyPiece(b: Boolean) {
+        isDeadly = b
+    }
 
     override var isMoved: Boolean = false
 

@@ -6,6 +6,10 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Bishop(color: Boolean) : Piece(color) {
 
+    override fun setDeadlyPiece(b: Boolean) {
+        isDeadly = b
+    }
+
     override fun createImageView(context: Context): PieceImageView {
         return object : PieceImageView(context, this@Bishop) {
             override var colors = Pair(
@@ -26,8 +30,6 @@ class Bishop(color: Boolean) : Piece(color) {
     override fun canJumpWhenCapturing(): Boolean {
         return false
     }
-
-    override var isDeadly: Boolean = false
 
     override var isMoved: Boolean = false
 

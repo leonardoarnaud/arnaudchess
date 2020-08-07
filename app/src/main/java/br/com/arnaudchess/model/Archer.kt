@@ -9,8 +9,10 @@ class Archer(color: Boolean) : Piece(color) {
 
     val kingSpirit = King(color)
 
+    lateinit var currentPieceImageView: PieceImageView
+
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Archer) {
+        currentPieceImageView = object : PieceImageView(context, this@Archer) {
             override var colors = Pair(
                 R.drawable.ic_archer_white,
                 R.drawable.ic_archer_black
@@ -20,6 +22,7 @@ class Archer(color: Boolean) : Piece(color) {
                 setupIcon()
             }
         }
+        return currentPieceImageView
     }
 
     override fun canJumpWhileMoving(): Boolean {
@@ -30,9 +33,11 @@ class Archer(color: Boolean) : Piece(color) {
         return false
     }
 
-    override var isDeadly: Boolean = false
-
     override var isMoved: Boolean = false
+
+    override fun setDeadlyPiece(b: Boolean) {
+        isDeadly = b
+    }
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return arrayListOf<Int>().apply {

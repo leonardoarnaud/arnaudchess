@@ -10,8 +10,11 @@ abstract class Piece(
     abstract fun createImageView(context: Context): PieceImageView
     abstract fun canJumpWhileMoving(): Boolean
     abstract fun canJumpWhenCapturing(): Boolean
-    abstract var isDeadly: Boolean
     abstract var isMoved: Boolean
+
+    abstract fun setDeadlyPiece(b: Boolean)
+
+    var isDeadly: Boolean = false
 
     public override fun clone(): Piece {
         return super.clone() as Piece
@@ -23,4 +26,5 @@ abstract class Piece(
         const val UP = true
         const val DOWN = false
     }
+
 }

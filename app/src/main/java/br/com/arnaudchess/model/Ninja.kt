@@ -36,7 +36,9 @@ class Ninja : Knight(false) {
         return false
     }
 
-    override var isDeadly: Boolean = false
-
     override var isMoved: Boolean = false
+
+    override fun setDeadlyPiece(b: Boolean) {
+        isDeadly = b
+    }
 }

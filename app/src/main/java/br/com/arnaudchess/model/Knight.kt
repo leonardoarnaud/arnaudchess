@@ -121,7 +121,9 @@ open class Knight(color: Boolean) : Piece(color) {
         return true
     }
 
-    override var isDeadly: Boolean = false
-
     override var isMoved: Boolean = false
+
+    override fun setDeadlyPiece(b: Boolean) {
+        isDeadly = b
+    }
 }

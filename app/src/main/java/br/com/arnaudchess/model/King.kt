@@ -27,8 +27,6 @@ class King(color: Boolean) : Piece(color) {
         return false
     }
 
-    override var isDeadly: Boolean = false
-
     override var isMoved: Boolean = false
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
@@ -131,4 +129,7 @@ class King(color: Boolean) : Piece(color) {
         }
     }
 
+    override fun setDeadlyPiece(b: Boolean) {
+        isDeadly = b
+    }
 }

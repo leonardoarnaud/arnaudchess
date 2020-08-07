@@ -145,6 +145,14 @@ class BoardFragment : Fragment() {
             ).execute()
             clearBorders()
             selectedBoardPositionFrameLayout = null
+            boardPositions.map {
+                val square = vm.boardConfiguration.value?.get(it.id)
+                if (square?.isDeadly == true){
+                    it.getPieceImageView()?.setDeadly(true)
+                } else {
+                    it.getPieceImageView()?.setDeadly(false)
+                }
+            }
         }
     }
 

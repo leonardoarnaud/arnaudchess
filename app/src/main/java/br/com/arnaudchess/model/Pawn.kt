@@ -19,6 +19,10 @@ class Pawn(color: Boolean, override val direction: Boolean) : Swordsman(color, d
         }
     }
 
+    override fun setDeadlyPiece(b: Boolean) {
+        isDeadly = b
+    }
+
     fun getFrontPositions(position: Int): ArrayList<Int> {
         return when (direction) {
             UP -> when (position) {
