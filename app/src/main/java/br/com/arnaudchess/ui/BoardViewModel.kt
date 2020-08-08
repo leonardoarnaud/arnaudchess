@@ -16,6 +16,7 @@ class BoardViewModel : ViewModel() {
     private var simulatedEnPassantMovePosition: Int = 0
     private var enPassantCapturePosition: Int = 0
     private var enPassantMovePosition = 0
+    var turn = WHITE
     val boardConfiguration = MutableLiveData<HashMap<Int, Piece>>()
     val message = MutableLiveData<Int>()
 
@@ -154,6 +155,8 @@ class BoardViewModel : ViewModel() {
     }
 
     private fun validateMove(start: Int, end: Int, bc: HashMap<Int, Piece>, isSimulation: Boolean = false): Move {
+        if (bc[start]?.color != turn) return Move(start, end, false)
+
         val pieceAtStart = bc[start]
         val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
         val isCapturing = bc[end] != null
@@ -444,7 +447,6 @@ class BoardViewModel : ViewModel() {
             bc.remove(end)
         }
 
-
         return bc
     }
 
@@ -560,7 +562,7 @@ class BoardViewModel : ViewModel() {
         fun execute(){
             if (isValid){
                 boardConfiguration.value = movePiece(start, end)
-
+                turn = !turn
             } else {
                 message.postValue(R.string.illegal_move)
             }

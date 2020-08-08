@@ -101,7 +101,8 @@ class BoardFragment : Fragment() {
 
     private fun selectToMove(sbf: BoardPositionFrameLayout) {
         if (selectedBoardPositionFrameLayout != null
-            && selectedBoardPositionFrameLayout!!.getPieceImageView()?.piece?.color == sbf.getPieceImageView()?.piece?.color
+            && (selectedBoardPositionFrameLayout!!.getPieceImageView()?.piece?.color == sbf.getPieceImageView()?.piece?.color ||
+                    selectedBoardPositionFrameLayout!!.getPieceImageView()?.piece?.color != vm.turn)
         ) {
             clearBorders()
             selectedBoardPositionFrameLayout = null
