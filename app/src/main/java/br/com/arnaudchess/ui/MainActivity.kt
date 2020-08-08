@@ -33,7 +33,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         startWhiteButton.setOnClickListener {
-            boardFragment?.startWhite()
+            boardFragment?.startWhiteBottom()
+        }
+        startBlackButton.setOnClickListener {
+            boardFragment?.startBlackBottom()
         }
 
     }

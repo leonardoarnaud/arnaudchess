@@ -22,11 +22,12 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/moveButton"
+        android:id="@+id/startBlackButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="move"
+        android:text="@string/activity_main_start_black"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/startWhiteButton" />
+        app:layout_constraintTop_toTopOf="parent" />
 
 </LinearLayout>

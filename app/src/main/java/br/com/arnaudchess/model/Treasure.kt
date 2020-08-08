@@ -4,28 +4,24 @@ import android.content.Context
 import br.com.arnaudchess.R
 import br.com.arnaudchess.ui.PieceImageView
 
-class Viking : Knight(true) {
 
-    val queenSpirit = Queen(true)
+class Treasure: Piece(null) {
 
-    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
-        return arrayListOf<Int>().apply {
-            addAll(queenSpirit.getLegalEndPositionsFrom(position))
-            addAll(super.getLegalEndPositionsFrom(position))
-        }
-    }
+    lateinit var currentPieceImageView: PieceImageView
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Viking) {
+        currentPieceImageView = object : PieceImageView(context, this@Treasure) {
             override var colors = Pair(
-                R.drawable.ic_viking_white,
-                R.drawable.ic_viking_white
+                R.drawable.ic_spoils,
+                R.drawable.ic_spoils
             )
 
             init {
                 setupIcon()
             }
         }
+        return currentPieceImageView
+
     }
 
     override fun canJumpWhileMoving(): Boolean {
@@ -36,9 +32,14 @@ class Viking : Knight(true) {
         return false
     }
 
+    override var isMoved: Boolean = false
+
     override fun setDeadlyPiece(b: Boolean) {
         isDeadly = b
     }
 
-    override var isMoved: Boolean = false
+    override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
+        return arrayListOf()
+    }
+
 }

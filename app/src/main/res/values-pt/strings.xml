@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Arnaud Chess</string>
     <string name="illegal_move">Movimento não permitido</string>
+    <string name="check_message">Xeque!</string>
+    <string name="game_over_dialog_title">Fim de Jogo</string>
+    <string name="draw_dialog_message">Ocorreu um empate.</string>
+    <string name="checkmate_dialog_message">Xeque-mate! Vitória das %s</string>
+    <string name="blacks">Pretas</string>
+    <string name="whites">Brancas</string>
+    <string name="activity_main_start_black">PRETAS</string>
+    <string name="activity_main_start_white">BRANCAS</string>
 </resources>

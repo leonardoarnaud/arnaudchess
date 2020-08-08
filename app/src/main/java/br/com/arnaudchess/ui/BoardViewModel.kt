@@ -1,5 +1,6 @@
 package br.com.arnaudchess.ui
 
+import android.os.AsyncTask
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -19,6 +20,8 @@ class BoardViewModel : ViewModel() {
     var turn = WHITE
     val boardConfiguration = MutableLiveData<HashMap<Int, Piece>>()
     val message = MutableLiveData<Int>()
+    val event = MutableLiveData<Int>()
+    val treasurePositions = ArrayList<Int>()
 
     private val boardLines = ArrayList<ArrayList<Int>>().apply {
         add(arrayListOf(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8))
@@ -89,58 +92,82 @@ class BoardViewModel : ViewModel() {
         _a4, _b4, _c4, _d4, _e4, _f4, _g4, _h4, _i4, _j4
     )
 
+    val allBoardPositions = arrayListOf(
+        _a1, _b1, _c1, _d1, _e1, _f1, _g1, _h1, _i1, _j1,
+        _a2, _b2, _c2, _d2, _e2, _f2, _g2, _h2, _i2, _j2,
+        _a3, _b3, _c3, _d3, _e3, _f3, _g3, _h3, _i3, _j3,
+        _a4, _b4, _c4, _d4, _e4, _f4, _g4, _h4, _i4, _j4,
+        _a5, _b5, _c5, _d5, _e5, _f5, _g5, _h5, _i5, _j5,
+        _a6, _b6, _c6, _d6, _e6, _f6, _g6, _h6, _i6, _j6,
+        _a7, _b7, _c7, _d7, _e7, _f7, _g7, _h7, _i7, _j7,
+        _a8, _b8, _c8, _d8, _e8, _f8, _g8, _h8, _i8, _j8
+    )
+
     val capturedPieces = ArrayList<Piece>()
     var whiteDirection = false
     var blackDirection = false
 
-    fun startWhite() {
-        whiteDirection = UP
-        blackDirection = DOWN
+    fun start(color: Boolean) {
+        reset()
+        whiteDirection = if (color) UP else DOWN
+        blackDirection = if (color) DOWN else UP
+        val colorDirection = if (color) whiteDirection else blackDirection
 
         boardConfiguration.postValue(HashMap<Int, Piece>().apply {
-            put(_a1, Rook(WHITE))
-            put(_b1, Catapult(WHITE))
-            put(_a3, Viking())
-            put(_c1, Archer(WHITE))
-            put(_d1, Bishop(WHITE))
-            put(_e1, Queen(WHITE))
-            put(_f1, King(WHITE))
-            put(_g1, Bishop(WHITE))
-            put(_h1, Archer(WHITE))
-            put(_i1, Catapult(WHITE))
-            put(_j1, Rook(WHITE))
-            put(_a2, Pawn(WHITE, whiteDirection))
-            put(_b2, Pawn(WHITE, whiteDirection))
-            put(_c2, Pawn(WHITE, whiteDirection))
-            put(_d2, Knight(WHITE))
-            put(_e2, Swordsman(WHITE, whiteDirection))
-            put(_f2, Swordsman(WHITE, whiteDirection))
-            put(_g2, Knight(WHITE))
-            put(_h2, Pawn(WHITE, whiteDirection))
-            put(_i2, Pawn(WHITE, whiteDirection))
-            put(_j2, Pawn(WHITE, whiteDirection))
-            put(_a8, Rook(BLACK))
-            put(_b8, Catapult(BLACK))
-            put(_a6, Ninja())
-            put(_c8, Archer(BLACK))
-            put(_d8, Bishop(BLACK))
-            put(_e8, Queen(BLACK))
-            put(_f8, King(BLACK))
-            put(_g8, Bishop(BLACK))
-            put(_h8, Archer(BLACK))
-            put(_i8, Catapult(BLACK))
-            put(_j8, Rook(BLACK))
-            put(_a7, Pawn(BLACK, blackDirection))
-            put(_b7, Pawn(BLACK, blackDirection))
-            put(_c7, Pawn(BLACK, blackDirection))
-            put(_d7, Knight(BLACK))
-            put(_e7, Swordsman(BLACK, blackDirection))
-            put(_f7, Swordsman(BLACK, blackDirection))
-            put(_g7, Knight(BLACK))
-            put(_h7, Pawn(BLACK, blackDirection))
-            put(_i7, Pawn(BLACK, blackDirection))
-            put(_j7, Pawn(BLACK, blackDirection))
+            put(_a1, Rook(color))
+            put(_b1, Catapult(color))
+            put(_c1, Archer(color))
+            put(_d1, Bishop(color))
+            put(_e1, Queen(color))
+            put(_f1, King(color))
+            put(_g1, Bishop(color))
+            put(_h1, Archer(color))
+            put(_i1, Catapult(color))
+            put(_j1, Rook(color))
+            put(_a2, Pawn(color, colorDirection))
+            put(_b2, Pawn(color, colorDirection))
+            put(_c2, Pawn(color, colorDirection))
+            put(_d2, Knight(color))
+            put(_e2, Swordsman(color, colorDirection))
+            put(_f2, Swordsman(color, colorDirection))
+            put(_g2, Knight(color))
+            put(_h2, Pawn(color, colorDirection))
+            put(_i2, Swordsman(color, colorDirection))
+            put(_j2, Pawn(color, colorDirection))
+            put(_j3, Treasure())
+            put(_a8, Rook(!color))
+            put(_b8, Catapult(!color))
+            put(_c8, Archer(!color))
+            put(_d8, Bishop(!color))
+            put(_e8, Queen(!color))
+            put(_f8, King(!color))
+            put(_g8, Bishop(!color))
+            put(_h8, Archer(!color))
+            put(_i8, Catapult(!color))
+            put(_j8, Rook(!color))
+            put(_a7, Pawn(!color, !colorDirection))
+            put(_b7, Pawn(!color, !colorDirection))
+            put(_c7, Pawn(!color, !colorDirection))
+            put(_d7, Knight(!color))
+            put(_e7, Swordsman(!color, !colorDirection))
+            put(_f7, Swordsman(!color, !colorDirection))
+            put(_g7, Knight(!color))
+            put(_h7, Pawn(!color, !colorDirection))
+            put(_i7, Pawn(!color, !colorDirection))
+            put(_j7, Pawn(!color, !colorDirection))
         })
+    }
+
+    private fun reset() {
+        capturedPieces.clear()
+        message.value = null
+        turn = WHITE
+        simulatedEnPassantCapturePosition = 0
+        simulatedEnPassantMovePosition = 0
+        enPassantCapturePosition = 0
+        enPassantMovePosition = 0
+        event.value = null
+        treasurePositions.clear()
     }
 
     fun validateMove(start: Int, end: Int): Move{
@@ -155,7 +182,7 @@ class BoardViewModel : ViewModel() {
     }
 
     private fun validateMove(start: Int, end: Int, bc: HashMap<Int, Piece>, isSimulation: Boolean = false): Move {
-        if (bc[start]?.color != turn) return Move(start, end, false)
+        if (bc[start]?.color != turn && !isSimulation) return Move(start, end, false)
 
         val pieceAtStart = bc[start]
         val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
@@ -353,7 +380,6 @@ class BoardViewModel : ViewModel() {
         val isSwordsmanCapturing = bc[start] is Swordsman && (isCapturing || isEnpassantCapturing)
         val isPawnDoubleMoving = isPawnDoubleMoving(bc, start, end) && bc[end]?.isDeadly != true
 
-
         if (isPawnDoubleMoving){
             if (isSimulation){
                 simulatedEnPassantMovePosition = getEnpassantMovePosition(end)
@@ -401,8 +427,8 @@ class BoardViewModel : ViewModel() {
         }
 
         bc[end]?.isMoved = true
-        if (isKnightCapturing && lastPieceCaptured?.isDeadly == false && isFromYourBoardSide(start, bc[end]!!.color)){
-            val color = bc[end]!!.color
+        if (bc[end]?.color != null && isKnightCapturing && lastPieceCaptured?.isDeadly == false && isFromYourBoardSide(start, bc[end]!!.color!!)){
+            val color = bc[end]!!.color!!
             bc[start] = Pawn(color, if (color == WHITE) whiteDirection else blackDirection)
         }
 
@@ -422,15 +448,16 @@ class BoardViewModel : ViewModel() {
         }
 
         if (!successHeroPromotion) {
-            if (isPawnCapturing) {
-                val color = bc[end]!!.color
-                bc[end] = Swordsman(color, if (color == WHITE) whiteDirection else blackDirection)
-            } else if (isSwordsmanCapturing && lastPieceCaptured != null && lastPieceCaptured !is Swordsman) {
+            val endColor = bc[end]!!.color
+            if (endColor != null && isPawnCapturing) {
+                bc[end] = Swordsman(endColor, if (endColor == WHITE) whiteDirection else blackDirection)
+            } else if (lastPieceCaptured?.color != null && isSwordsmanCapturing && lastPieceCaptured != null && lastPieceCaptured !is Swordsman) {
                 bc[end] = when (lastPieceCaptured) {
                     is Viking -> Ninja().apply { setDeadlyPiece(!lastPieceCaptured!!.isDeadly) }
                     is Ninja -> Viking().apply { setDeadlyPiece(!lastPieceCaptured!!.isDeadly) }
-                    else -> lastPieceCaptured!!.clone().apply {
-                        color = !lastPieceCaptured!!.color
+                    else ->
+                        lastPieceCaptured!!.clone().apply {
+                        color = !(lastPieceCaptured!!.color!!)
                     }
                 }
             }
@@ -445,6 +472,7 @@ class BoardViewModel : ViewModel() {
         if (lastPieceCaptured?.isDeadly == true){
             if (!isSimulation) capturedPieces.add(lastPieceCaptured!!)
             bc.remove(end)
+            bc[end] = Treasure()
         }
 
         return bc
@@ -563,6 +591,7 @@ class BoardViewModel : ViewModel() {
             if (isValid){
                 boardConfiguration.value = movePiece(start, end)
                 turn = !turn
+                verifyCheckMateOrDraw()
             } else {
                 message.postValue(R.string.illegal_move)
             }
@@ -571,8 +600,36 @@ class BoardViewModel : ViewModel() {
 
     }
 
+    private fun verifyCheckMateOrDraw() {
+        AsyncTask.execute {
+            boardConfiguration.value?.let { bc ->
+                allBoardPositions.map { pos ->
+                    if (bc[pos]?.color == turn){
+                        bc[pos]?.getLegalEndPositionsFrom(pos)?.map { legalPos ->
+                            if (validateMove(pos, legalPos).isValid){
+                                if (kingIsInCheck(bc, turn)){
+                                    event.postValue(CHECK)
+                                }
+                                return@execute
+                            }
+                        }
+                    }
+                }
+                if (kingIsInCheck(bc, turn)){
+                    event.postValue(CHECKMATE)
+                } else {
+                    event.postValue(DRAW)
+                }
+            }
+        }
+    }
+
+
     companion object{
         const val WHITE_SQUARE = true
         const val BLACK_SQUARE = false
+        const val CHECK = 1
+        const val DRAW = 2
+        const val CHECKMATE = 3
     }
 }

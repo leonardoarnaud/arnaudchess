@@ -1,7 +1,9 @@
 package br.com.arnaudchess.ui
 
+import android.app.AlertDialog
 import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +13,11 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import br.com.arnaudchess.R
 import br.com.arnaudchess.model.Piece
+import br.com.arnaudchess.model.Piece.Companion.BLACK
+import br.com.arnaudchess.model.Piece.Companion.WHITE
+import br.com.arnaudchess.ui.BoardViewModel.Companion.CHECK
+import br.com.arnaudchess.ui.BoardViewModel.Companion.CHECKMATE
+import br.com.arnaudchess.ui.BoardViewModel.Companion.DRAW
 import kotlinx.android.synthetic.main.fragment_board.*
 import java.util.*
 
@@ -67,9 +74,34 @@ class BoardFragment : Fragment() {
             }
         })
 
-        vm.message.observe(viewLifecycleOwner, Observer {
+        vm.message.observe(viewLifecycleOwner, Observer {it?.let {
             Toast.makeText(context, getString(it), Toast.LENGTH_SHORT).show()
-        })
+        }})
+
+        vm.event.observe(viewLifecycleOwner, Observer { it?.let {
+            when (it) {
+                CHECK -> Toast.makeText(
+                    context,
+                    getString(R.string.check_message),
+                    Toast.LENGTH_SHORT
+                ).show()
+                DRAW -> AlertDialog.Builder(context)
+                    .setTitle(R.string.game_over_dialog_title)
+                    .setMessage(R.string.draw_dialog_message)
+                    .setIcon(if (vm.turn) R.drawable.ic_king_white else R.drawable.ic_king_black)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> }
+                    .show()
+                CHECKMATE -> AlertDialog.Builder(context)
+                    .setTitle(R.string.game_over_dialog_title)
+                    .setMessage(String.format(
+                        getString(R.string.checkmate_dialog_message),
+                        if (vm.turn) getString(R.string.blacks) else getString(R.string.whites)
+                    )).setIcon(if (vm.turn) R.drawable.ic_king_black else R.drawable.ic_king_white)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> }
+                    .show()
+                else -> Log.i("as","")
+            }
+        }})
 
         boardPositions.map {
             it.setOnClickListener {
@@ -157,8 +189,12 @@ class BoardFragment : Fragment() {
         }
     }
 
-    fun startWhite() {
-        vm.startWhite()
+    fun startWhiteBottom() {
+        vm.start(WHITE)
+    }
+
+    fun startBlackBottom() {
+        vm.start(BLACK)
     }
 
     companion object {

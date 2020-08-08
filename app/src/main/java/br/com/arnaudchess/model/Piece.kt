@@ -4,7 +4,7 @@ import android.content.Context
 import br.com.arnaudchess.ui.PieceImageView
 
 abstract class Piece(
-    var color: Boolean
+    var color: Boolean?
 ): Cloneable {
     abstract fun getLegalEndPositionsFrom(position: Int): ArrayList<Int>
     abstract fun createImageView(context: Context): PieceImageView

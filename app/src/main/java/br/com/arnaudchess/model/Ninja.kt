@@ -6,7 +6,7 @@ import br.com.arnaudchess.ui.PieceImageView
 
 class Ninja : Knight(false) {
 
-    val queenSpirit = Queen(color)
+    val queenSpirit = Queen(false)
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {
         return arrayListOf<Int>().apply {
