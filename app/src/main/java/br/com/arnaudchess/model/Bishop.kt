@@ -11,7 +11,7 @@ class Bishop(color: Boolean) : Piece(color) {
     }
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Bishop) {
+        return object : PieceImageView(context, this@Bishop, gold) {
             override var colors = Pair(
                 R.drawable.ic_bishop_white,
                 R.drawable.ic_bishop_black

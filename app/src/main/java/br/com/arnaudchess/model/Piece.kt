@@ -15,6 +15,7 @@ abstract class Piece(
     abstract fun setDeadlyPiece(b: Boolean)
 
     var isDeadly: Boolean = false
+    var gold: Int = 0
 
     public override fun clone(): Piece {
         return super.clone() as Piece

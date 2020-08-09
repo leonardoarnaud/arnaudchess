@@ -12,7 +12,7 @@ class Archer(color: Boolean) : Piece(color) {
     lateinit var currentPieceImageView: PieceImageView
 
     override fun createImageView(context: Context): PieceImageView {
-        currentPieceImageView = object : PieceImageView(context, this@Archer) {
+        currentPieceImageView = object : PieceImageView(context, this@Archer, gold) {
             override var colors = Pair(
                 R.drawable.ic_archer_white,
                 R.drawable.ic_archer_black
@@ -22,6 +22,7 @@ class Archer(color: Boolean) : Piece(color) {
                 setupIcon()
             }
         }
+
         return currentPieceImageView
     }
 

@@ -16,7 +16,7 @@ class Ninja : Knight(false) {
     }
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Ninja) {
+        return object : PieceImageView(context, this@Ninja, gold) {
             override var colors = Pair(
                 R.drawable.ic_ninja_black,
                 R.drawable.ic_ninja_black

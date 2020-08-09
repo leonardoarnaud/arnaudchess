@@ -7,7 +7,7 @@ import br.com.arnaudchess.ui.PieceImageView
 class King(color: Boolean) : Piece(color) {
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@King) {
+        return object : PieceImageView(context, this@King, gold) {
             override var colors = Pair(
                 R.drawable.ic_king_white,
                 R.drawable.ic_king_black

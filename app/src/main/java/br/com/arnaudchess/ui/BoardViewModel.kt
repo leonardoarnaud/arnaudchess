@@ -23,6 +23,15 @@ class BoardViewModel : ViewModel() {
     val event = MutableLiveData<Int>()
     val treasurePositions = ArrayList<Int>()
 
+    var whiteGold = 0
+    var blackGold = 0
+    val myGold = MutableLiveData<Int>()
+
+    init {
+        whiteGold = 50000
+        blackGold = 50000
+    }
+
     private val boardLines = ArrayList<ArrayList<Int>>().apply {
         add(arrayListOf(_a1, _a2, _a3, _a4, _a5, _a6, _a7, _a8))
         add(arrayListOf(_b1, _b2, _b3, _b4, _b5, _b6, _b7, _b8))
@@ -107,7 +116,18 @@ class BoardViewModel : ViewModel() {
     var whiteDirection = false
     var blackDirection = false
 
+    val defaultBet = 3000
+
     fun start(color: Boolean) {
+        var gold = if (color) whiteGold else blackGold
+        if (gold < defaultBet) {
+            message.postValue(R.string.insuficient_gold)
+            return
+        }
+        gold-=defaultBet
+        if (color) whiteGold = gold else blackGold = gold
+        myGold.postValue(gold)
+
         reset()
         whiteDirection = if (color) UP else DOWN
         blackDirection = if (color) DOWN else UP
@@ -134,7 +154,6 @@ class BoardViewModel : ViewModel() {
             put(_h2, Pawn(color, colorDirection))
             put(_i2, Swordsman(color, colorDirection))
             put(_j2, Pawn(color, colorDirection))
-            put(_j3, Treasure())
             put(_a8, Rook(!color))
             put(_b8, Catapult(!color))
             put(_c8, Archer(!color))
@@ -155,7 +174,10 @@ class BoardViewModel : ViewModel() {
             put(_h7, Pawn(!color, !colorDirection))
             put(_i7, Pawn(!color, !colorDirection))
             put(_j7, Pawn(!color, !colorDirection))
+            get(_f1)?.gold = defaultBet
+            get(_f8)?.gold = defaultBet
         })
+
     }
 
     private fun reset() {
@@ -322,12 +344,8 @@ class BoardViewModel : ViewModel() {
         Log.i("ARNAUD","SIMULAÇÃO INICIADA")
         val newBc = HashMap<Int, Piece>()
         val originalBoardConfiguration = boardConfiguration.value ?: HashMap()
-        originalBoardConfiguration.map {
-            newBc.put(it.key, it.value.clone())
-        }
-
+        originalBoardConfiguration.map { newBc.put(it.key, it.value.clone()) }
         movePiece(start, end, newBc, true)
-
         return kingIsInCheck(newBc, startPieceColor)
     }
 

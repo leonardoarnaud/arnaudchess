@@ -10,7 +10,7 @@ class Treasure: Piece(null) {
     lateinit var currentPieceImageView: PieceImageView
 
     override fun createImageView(context: Context): PieceImageView {
-        currentPieceImageView = object : PieceImageView(context, this@Treasure) {
+        currentPieceImageView = object : PieceImageView(context, this@Treasure, gold) {
             override var colors = Pair(
                 R.drawable.ic_spoils,
                 R.drawable.ic_spoils

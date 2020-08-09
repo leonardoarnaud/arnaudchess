@@ -22,14 +22,11 @@ class MainActivity : AppCompatActivity() {
                 .commitNow()
         }
 
-        boardContainerFrameLayout.addOnLayoutChangeListener { v, left, top, right, bottom, oldLeft, oldTop, oldRight, oldBottom ->
-            if (boardContainerFrameLayout.tag != true) {
-                boardContainerFrameLayout.layoutParams = LinearLayout.LayoutParams(
-                    boardContainerFrameLayout.height + (boardContainerFrameLayout.height * 2.6 / 10).toInt(),
-                    boardContainerFrameLayout.height
-                )
-                boardContainerFrameLayout.tag = true
-            }
+        boardContainerFrameLayout.post {
+            boardContainerFrameLayout.layoutParams = LinearLayout.LayoutParams(
+                boardContainerFrameLayout.height + (boardContainerFrameLayout.height * 2.6 / 10).toInt(),
+                boardContainerFrameLayout.height
+            )
         }
 
         startWhiteButton.setOnClickListener {
@@ -39,5 +36,9 @@ class MainActivity : AppCompatActivity() {
             boardFragment?.startBlackBottom()
         }
 
+    }
+
+    fun setGold(amount: Int) {
+        goldTextView.text = "Gold: $$amount"
     }
 }

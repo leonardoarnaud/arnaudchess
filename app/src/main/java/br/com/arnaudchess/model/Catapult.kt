@@ -9,7 +9,7 @@ class Catapult(color: Boolean) : Piece(color) {
     val knightSpirit = Knight(color)
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Catapult) {
+        return object : PieceImageView(context, this@Catapult, gold) {
             override var colors = Pair(
                 R.drawable.ic_catapult_white,
                 R.drawable.ic_catapult_black

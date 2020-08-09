@@ -15,7 +15,7 @@ class Rook(color: Boolean) : Piece(color) {
     }
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Rook) {
+        return object : PieceImageView(context, this@Rook, gold) {
             override var colors = Pair(
                 R.drawable.ic_rook_white,
                 R.drawable.ic_rook_black

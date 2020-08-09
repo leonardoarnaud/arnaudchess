@@ -101,7 +101,7 @@ open class Knight(color: Boolean) : Piece(color) {
     }
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Knight) {
+        return object : PieceImageView(context, this@Knight, gold) {
             override var colors = Pair(
                 R.drawable.ic_knight_white,
                 R.drawable.ic_knight_black

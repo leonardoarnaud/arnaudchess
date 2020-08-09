@@ -10,7 +10,7 @@ open class Swordsman(
 ) : Piece(color) {
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Swordsman) {
+        return object : PieceImageView(context, this@Swordsman, gold) {
             override var colors = Pair(
                 R.drawable.ic_swordsman_white,
                 R.drawable.ic_swordsman_black

@@ -32,6 +32,7 @@ class BoardPositionFrameLayout : FrameLayout {
 
     fun select() {
         foreground = ContextCompat.getDrawable(context, R.drawable.border_light)
+        getPieceImageView()?.showGoldAmount()
     }
 
     fun hint() {

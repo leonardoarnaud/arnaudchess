@@ -16,7 +16,7 @@ class Viking : Knight(true) {
     }
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Viking) {
+        return object : PieceImageView(context, this@Viking, gold) {
             override var colors = Pair(
                 R.drawable.ic_viking_white,
                 R.drawable.ic_viking_white

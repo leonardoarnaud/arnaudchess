@@ -7,7 +7,7 @@ import br.com.arnaudchess.ui.PieceImageView
 class Pawn(color: Boolean, override val direction: Boolean) : Swordsman(color, direction) {
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Pawn) {
+        return object : PieceImageView(context, this@Pawn, gold) {
             override var colors = Pair(
                 R.drawable.ic_pawn_white,
                 R.drawable.ic_pawn_black

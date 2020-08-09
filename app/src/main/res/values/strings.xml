@@ -9,4 +9,5 @@
     <string name="blacks">Pretas</string>
     <string name="whites">Brancas</string>
     <string name="activity_main_start_black">PRETAS</string>
+    <string name="insuficient_gold">Você não tem Gold suficiente para começar.</string>
 </resources>

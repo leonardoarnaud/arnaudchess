@@ -17,7 +17,7 @@ class Queen(color: Boolean) : Piece(color) {
     }
 
     override fun createImageView(context: Context): PieceImageView {
-        return object : PieceImageView(context, this@Queen) {
+        return object : PieceImageView(context, this@Queen, gold) {
             override var colors = Pair(
                 R.drawable.ic_queen_white,
                 R.drawable.ic_queen_black
