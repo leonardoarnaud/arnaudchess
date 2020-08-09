@@ -113,6 +113,8 @@ open class Knight(color: Boolean) : Piece(color) {
         }
     }
 
+    override var priceToMove: Int = 30
+
     override fun canJumpWhileMoving(): Boolean {
         return true
     }

@@ -21,6 +21,8 @@ class Catapult(color: Boolean) : Piece(color) {
         }
     }
 
+    override var priceToMove: Int = 60
+
     override fun canJumpWhileMoving(): Boolean {
         return false
     }

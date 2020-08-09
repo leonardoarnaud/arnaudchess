@@ -87,7 +87,10 @@ class BoardFragment : Fragment() {
                 ).show()
                 DRAW -> AlertDialog.Builder(context)
                     .setTitle(R.string.game_over_dialog_title)
-                    .setMessage(R.string.draw_dialog_message)
+                    .setMessage(String.format(
+                        getString(R.string.draw_dialog_message),
+                        if (vm.turn) getString(R.string.blacks) else getString(R.string.whites)
+                    ))
                     .setIcon(if (vm.turn) R.drawable.ic_king_white else R.drawable.ic_king_black)
                     .setPositiveButton(android.R.string.ok) { _, _ -> }
                     .show()

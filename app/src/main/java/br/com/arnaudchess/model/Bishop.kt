@@ -23,6 +23,8 @@ class Bishop(color: Boolean) : Piece(color) {
         }
     }
 
+    override var priceToMove: Int = 40
+
     override fun canJumpWhileMoving(): Boolean {
         return false
     }

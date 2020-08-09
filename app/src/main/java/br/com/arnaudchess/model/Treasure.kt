@@ -24,6 +24,8 @@ class Treasure: Piece(null) {
 
     }
 
+    override var priceToMove: Int = 0
+
     override fun canJumpWhileMoving(): Boolean {
         return false
     }

@@ -4,7 +4,7 @@
     <string name="illegal_move">Movimento não permitido</string>
     <string name="check_message">Xeque!</string>
     <string name="game_over_dialog_title">Fim de Jogo</string>
-    <string name="draw_dialog_message">Ocorreu um empate.</string>
+    <string name="draw_dialog_message">O Rei foi incapacitado. Vitória das %s.</string>
     <string name="checkmate_dialog_message">Xeque-mate! Vitória das %s</string>
     <string name="blacks">Pretas</string>
     <string name="whites">Brancas</string>

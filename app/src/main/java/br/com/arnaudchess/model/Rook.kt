@@ -27,6 +27,8 @@ class Rook(color: Boolean) : Piece(color) {
         }
     }
 
+    override var priceToMove: Int = 70
+
     override fun setDeadlyPiece(b: Boolean) {
         isDeadly = b
     }

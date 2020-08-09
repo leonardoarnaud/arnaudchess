@@ -26,6 +26,8 @@ class Archer(color: Boolean) : Piece(color) {
         return currentPieceImageView
     }
 
+    override var priceToMove: Int = 50
+
     override fun canJumpWhileMoving(): Boolean {
         return true
     }

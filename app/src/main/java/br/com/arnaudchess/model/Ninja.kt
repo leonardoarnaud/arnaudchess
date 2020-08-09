@@ -28,6 +28,8 @@ class Ninja : Knight(false) {
         }
     }
 
+    override var priceToMove: Int = 130
+
     override fun canJumpWhileMoving(): Boolean {
         return false
     }

@@ -28,6 +28,8 @@ class Viking : Knight(true) {
         }
     }
 
+    override var priceToMove: Int = 130
+
     override fun canJumpWhileMoving(): Boolean {
         return false
     }

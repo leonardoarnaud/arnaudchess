@@ -22,6 +22,8 @@ open class Swordsman(
         }
     }
 
+    override var priceToMove: Int = 20
+
     override fun canJumpWhileMoving(): Boolean {
         return false
     }

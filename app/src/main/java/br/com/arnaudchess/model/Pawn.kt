@@ -19,6 +19,8 @@ class Pawn(color: Boolean, override val direction: Boolean) : Swordsman(color, d
         }
     }
 
+    override var priceToMove: Int = 10
+
     override fun setDeadlyPiece(b: Boolean) {
         isDeadly = b
     }

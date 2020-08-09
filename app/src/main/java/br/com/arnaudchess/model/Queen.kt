@@ -16,6 +16,8 @@ class Queen(color: Boolean) : Piece(color) {
         }
     }
 
+    override var priceToMove: Int = 100
+
     override fun createImageView(context: Context): PieceImageView {
         return object : PieceImageView(context, this@Queen, gold) {
             override var colors = Pair(

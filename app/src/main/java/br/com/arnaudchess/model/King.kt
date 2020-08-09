@@ -27,6 +27,8 @@ class King(color: Boolean) : Piece(color) {
         return false
     }
 
+    override var priceToMove: Int = 0
+
     override var isMoved: Boolean = false
 
     override fun getLegalEndPositionsFrom(position: Int): ArrayList<Int> {

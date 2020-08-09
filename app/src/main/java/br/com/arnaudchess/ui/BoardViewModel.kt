@@ -116,7 +116,7 @@ class BoardViewModel : ViewModel() {
     var whiteDirection = false
     var blackDirection = false
 
-    val defaultBet = 3000
+    var defaultBet = 3000
 
     fun start(color: Boolean) {
         var gold = if (color) whiteGold else blackGold
@@ -124,7 +124,7 @@ class BoardViewModel : ViewModel() {
             message.postValue(R.string.insuficient_gold)
             return
         }
-        gold-=defaultBet
+        gold -= defaultBet
         if (color) whiteGold = gold else blackGold = gold
         myGold.postValue(gold)
 
@@ -177,7 +177,6 @@ class BoardViewModel : ViewModel() {
             get(_f1)?.gold = defaultBet
             get(_f8)?.gold = defaultBet
         })
-
     }
 
     private fun reset() {
@@ -204,9 +203,12 @@ class BoardViewModel : ViewModel() {
     }
 
     private fun validateMove(start: Int, end: Int, bc: HashMap<Int, Piece>, isSimulation: Boolean = false): Move {
-        if (bc[start]?.color != turn && !isSimulation) return Move(start, end, false)
-
+        val king = bc.values.single{ it is King && it.color == bc[start]!!.color }
         val pieceAtStart = bc[start]
+        val isNotYourTurn = pieceAtStart?.color != turn && !isSimulation
+        val isInsuficientGoldToMove = king.gold < bc[start]?.priceToMove ?: 0
+        if (isNotYourTurn || isInsuficientGoldToMove) return Move(start, end, false)
+
         val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
         val isCapturing = bc[end] != null
         val isMoving = bc[end] == null
@@ -397,6 +399,11 @@ class BoardViewModel : ViewModel() {
         val isPawnCapturing = bc[start] is Pawn && (isCapturing || isEnpassantCapturing)
         val isSwordsmanCapturing = bc[start] is Swordsman && (isCapturing || isEnpassantCapturing)
         val isPawnDoubleMoving = isPawnDoubleMoving(bc, start, end) && bc[end]?.isDeadly != true
+        val king = bc.values.single{ it is King && it.color == bc[start]!!.color }
+        val price = bc[start]!!.priceToMove
+        bc[start]!!.gold += price
+        king.gold -= price
+        val totalBattleGold = bc[start]!!.gold + (bc[end]?.gold ?: 0)
 
         if (isPawnDoubleMoving){
             if (isSimulation){
@@ -493,6 +500,7 @@ class BoardViewModel : ViewModel() {
             bc[end] = Treasure()
         }
 
+        bc[end]?.gold = totalBattleGold
         return bc
     }
 

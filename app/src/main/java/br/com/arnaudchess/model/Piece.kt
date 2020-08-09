@@ -16,6 +16,7 @@ abstract class Piece(
 
     var isDeadly: Boolean = false
     var gold: Int = 0
+    open var priceToMove: Int = 0
 
     public override fun clone(): Piece {
         return super.clone() as Piece
