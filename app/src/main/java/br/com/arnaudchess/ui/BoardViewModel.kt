@@ -498,9 +498,11 @@ class BoardViewModel : ViewModel() {
             if (!isSimulation) capturedPieces.add(lastPieceCaptured!!)
             bc.remove(end)
             bc[end] = Treasure()
+            bc[end]?.gold = totalBattleGold
+        } else {
+            king.gold += lastPieceCaptured?.gold ?: 0
         }
 
-        bc[end]?.gold = totalBattleGold
         return bc
     }
 
