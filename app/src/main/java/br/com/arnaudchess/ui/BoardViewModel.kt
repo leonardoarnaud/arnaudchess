@@ -126,6 +126,8 @@ class BoardViewModel : ViewModel() {
         }
         gold -= defaultBet
         if (color) whiteGold = gold else blackGold = gold
+        whiteGold -= defaultBet
+        blackGold -= defaultBet
         myGold.postValue(gold)
 
         reset()
@@ -644,11 +646,35 @@ class BoardViewModel : ViewModel() {
                     }
                 }
                 if (kingIsInCheck(bc, turn)){
+                    val loserKing = bc.values.single{ it is King && it.color == turn }
+                    if (turn) {
+                        blackGold += loserKing.gold
+                    } else {
+                        whiteGold += loserKing.gold
+                    }
+                    bc.values.single{ it is King && it.color == turn }.gold = 0
+                    backGolds(bc)
+                    boardConfiguration.postValue(boardConfiguration.value)
+                    myGold.postValue(if (whiteDirection == UP) whiteGold else blackGold)
                     event.postValue(CHECKMATE)
                 } else {
+                    backGolds(bc)
+                    boardConfiguration.postValue(boardConfiguration.value)
+                    myGold.postValue(if (whiteDirection == UP) whiteGold else blackGold)
                     event.postValue(DRAW)
                 }
             }
+        }
+    }
+
+    private fun backGolds(bc: java.util.HashMap<Int, Piece>) {
+        bc.values.filter{ it.color == BLACK }.map {
+            blackGold += it.gold
+            it.gold = 0
+        }
+        bc.values.filter{ it.color == WHITE }.map {
+            whiteGold += it.gold
+            it.gold = 0
         }
     }
 

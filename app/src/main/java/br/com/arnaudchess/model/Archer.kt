@@ -9,10 +9,8 @@ class Archer(color: Boolean) : Piece(color) {
 
     val kingSpirit = King(color)
 
-    lateinit var currentPieceImageView: PieceImageView
-
     override fun createImageView(context: Context): PieceImageView {
-        currentPieceImageView = object : PieceImageView(context, this@Archer, gold) {
+        return object : PieceImageView(context, this@Archer, gold) {
             override var colors = Pair(
                 R.drawable.ic_archer_white,
                 R.drawable.ic_archer_black
@@ -22,8 +20,6 @@ class Archer(color: Boolean) : Piece(color) {
                 setupIcon()
             }
         }
-
-        return currentPieceImageView
     }
 
     override var priceToMove: Int = 50
