@@ -124,11 +124,14 @@ class BoardViewModel : ViewModel() {
             message.postValue(R.string.insuficient_gold)
             return
         }
-        gold -= defaultBet
-        if (color) whiteGold = gold else blackGold = gold
-        whiteGold -= defaultBet
-        blackGold -= defaultBet
-        myGold.postValue(gold)
+
+        if (color) {
+            whiteGold -= defaultBet
+            myGold.postValue(whiteGold)
+        }  else {
+            blackGold -= defaultBet
+            myGold.postValue(blackGold)
+        }
 
         reset()
         whiteDirection = if (color) UP else DOWN
