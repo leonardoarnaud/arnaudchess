@@ -39,6 +39,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setGold(amount: Int) {
-        goldTextView.text = "Gold: $$amount"
+        goldTextView.text = "Meu Gold: $$amount"
+    }
+
+    fun setEnemyGold(amount: Int) {
+        enemyGoldTextView.text = "Inimigo Gold: $$amount"
     }
 }

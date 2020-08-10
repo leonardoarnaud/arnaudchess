@@ -20,7 +20,12 @@
         <TextView android:id="@+id/goldTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Gold: $50000"/>
+            android:text="Meu Gold: $50000"/>
+
+        <TextView android:id="@+id/enemyGoldTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Inimigo Gold: $50000"/>
 
         <Button
             android:id="@+id/startWhiteButton"

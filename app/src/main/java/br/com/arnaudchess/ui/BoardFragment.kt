@@ -110,6 +110,10 @@ class BoardFragment : Fragment() {
             (requireActivity() as MainActivity).setGold(it)
         }})
 
+        vm.enemyGold.observe(viewLifecycleOwner, Observer { it?.let {
+            (requireActivity() as MainActivity).setEnemyGold(it)
+        }})
+
         boardPositions.map {
             it.setOnClickListener {
                 selectToMove(it as BoardPositionFrameLayout)

@@ -26,10 +26,11 @@ class BoardViewModel : ViewModel() {
     var whiteGold = 0
     var blackGold = 0
     val myGold = MutableLiveData<Int>()
+    val enemyGold = MutableLiveData<Int>()
 
     init {
-        whiteGold = 50000
-        blackGold = 50000
+        myGold.value = 40000
+        enemyGold.value = 50000
     }
 
     private val boardLines = ArrayList<ArrayList<Int>>().apply {
@@ -116,24 +117,27 @@ class BoardViewModel : ViewModel() {
     var whiteDirection = false
     var blackDirection = false
 
-    var defaultBet = 3000
+    var defaultBet = 300
 
     fun start(color: Boolean) {
-        var gold = if (color) whiteGold else blackGold
-        if (gold < defaultBet) {
+        if (myGold.value ?: 0 < defaultBet || enemyGold.value ?: 0 < defaultBet ) {
             message.postValue(R.string.insuficient_gold)
             return
         }
-
+        reset()
         if (color) {
-            whiteGold -= defaultBet
+            whiteGold = myGold.value!! - defaultBet
+            blackGold = enemyGold.value!! - defaultBet
             myGold.postValue(whiteGold)
+            enemyGold.postValue(blackGold)
         }  else {
-            blackGold -= defaultBet
+            blackGold = myGold.value!! - defaultBet
+            whiteGold = enemyGold.value!! - defaultBet
             myGold.postValue(blackGold)
+            enemyGold.postValue(whiteGold)
         }
 
-        reset()
+
         whiteDirection = if (color) UP else DOWN
         blackDirection = if (color) DOWN else UP
         val colorDirection = if (color) whiteDirection else blackDirection
@@ -212,7 +216,7 @@ class BoardViewModel : ViewModel() {
         val pieceAtStart = bc[start]
         val isNotYourTurn = pieceAtStart?.color != turn && !isSimulation
         val isInsuficientGoldToMove = king.gold < bc[start]?.priceToMove ?: 0
-        if (isNotYourTurn || isInsuficientGoldToMove) return Move(start, end, false)
+        if (isNotYourTurn || isInsuficientGoldToMove || event.value == DRAW || event.value == CHECKMATE) return Move(start, end, false)
 
         val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
         val isCapturing = bc[end] != null
@@ -408,6 +412,12 @@ class BoardViewModel : ViewModel() {
         val price = bc[start]!!.priceToMove
         bc[start]!!.gold += price
         king.gold -= price
+        if (bc[start] is King){
+            bc.values.filter { it.color == bc[start]!!.color && it.gold > 0 }.map {
+                it.gold -= 1
+                bc[start]!!.gold += 1
+            }
+        }
         val totalBattleGold = bc[start]!!.gold + (bc[end]?.gold ?: 0)
 
         if (isPawnDoubleMoving){
@@ -649,23 +659,23 @@ class BoardViewModel : ViewModel() {
                     }
                 }
                 if (kingIsInCheck(bc, turn)){
-                    val loserKing = bc.values.single{ it is King && it.color == turn }
+                    val whiteKing = bc.values.single{ it is King && it.color == WHITE }
+                    val blackKing = bc.values.single{ it is King && it.color == BLACK }
                     if (turn) {
-                        blackGold += loserKing.gold
+                        blackGold += whiteKing.gold
+                        whiteKing.gold = 0
                     } else {
-                        whiteGold += loserKing.gold
+                        whiteGold += blackKing.gold
+                        blackKing.gold = 0
                     }
-                    bc.values.single{ it is King && it.color == turn }.gold = 0
-                    backGolds(bc)
-                    boardConfiguration.postValue(boardConfiguration.value)
-                    myGold.postValue(if (whiteDirection == UP) whiteGold else blackGold)
                     event.postValue(CHECKMATE)
                 } else {
-                    backGolds(bc)
-                    boardConfiguration.postValue(boardConfiguration.value)
-                    myGold.postValue(if (whiteDirection == UP) whiteGold else blackGold)
                     event.postValue(DRAW)
                 }
+                backGolds(bc)
+                boardConfiguration.postValue(boardConfiguration.value)
+                myGold.postValue(if (whiteDirection == UP) whiteGold else blackGold)
+                enemyGold.postValue(if (whiteDirection == DOWN) whiteGold else blackGold)
             }
         }
     }
