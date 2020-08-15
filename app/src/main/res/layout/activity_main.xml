@@ -12,42 +12,70 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent" />
 
-    <LinearLayout
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="0dp"
+        android:layout_weight="1"
         android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="19dp">
 
-        <TextView android:id="@+id/goldTextView"
+        <TextView
+            android:id="@+id/goldTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Meu Gold: $50000"/>
-
-        <TextView android:id="@+id/enemyGoldTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Inimigo Gold: $50000"/>
-
-        <Button
-            android:id="@+id/startWhiteButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/activity_main_start_white"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="$50000"
+            app:layout_constraintBottom_toTopOf="@+id/myNameTextView"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/enemyGoldTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Procurando"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <Button
-            android:id="@+id/startBlackButton"
+            android:id="@+id/searchOpponentButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/activity_main_start_black"
+            android:text="Encontrar oponente"
+            app:layout_constraintBottom_toBottomOf="@+id/myNameTextView"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/enemyNameTextView" />
+
+        <Button
+            android:id="@+id/signoutButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sair"
+            app:layout_constraintBottom_toTopOf="@+id/startBlackButton"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/enemyNameTextView" />
+
+        <TextView
+            android:id="@+id/myNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintStart_toStartOf="parent"
+            tools:text="MeuNome" />
 
+        <TextView
+            android:id="@+id/enemyNameTextView"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/enemyGoldTextView"
+            tools:text="Oponente..." />
 
-
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
 
 </LinearLayout>

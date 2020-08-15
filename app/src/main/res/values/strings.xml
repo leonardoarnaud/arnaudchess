@@ -10,4 +10,9 @@
     <string name="whites">Brancas</string>
     <string name="activity_main_start_black">PRETAS</string>
     <string name="insuficient_gold">Você não tem Gold suficiente para começar.</string>
+    <string name="title_activity_login">Login</string>
+
+    <!--<string name="default_web_client_id" translatable="false">176437755720-3k3912bh13pf4f6tchmoj9d75ekomf2q.apps.googleusercontent.com</string>-->
+    <string name="login_google">Login com Google</string>
+    <string name="is_not_your_turn_message">Não é a sua vez.</string>
 </resources>

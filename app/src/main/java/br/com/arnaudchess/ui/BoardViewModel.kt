@@ -147,8 +147,8 @@ class BoardViewModel : ViewModel() {
             put(_b1, Catapult(color))
             put(_c1, Archer(color))
             put(_d1, Bishop(color))
-            put(_e1, Queen(color))
-            put(_f1, King(color))
+            put(if (whiteDirection == UP) _e1 else _f1, Queen(color))
+            put(if (whiteDirection == UP) _f1 else _e1, King(color))
             put(_g1, Bishop(color))
             put(_h1, Archer(color))
             put(_i1, Catapult(color))
@@ -167,8 +167,8 @@ class BoardViewModel : ViewModel() {
             put(_b8, Catapult(!color))
             put(_c8, Archer(!color))
             put(_d8, Bishop(!color))
-            put(_e8, Queen(!color))
-            put(_f8, King(!color))
+            put(if (whiteDirection == UP) _e8 else _f8, Queen(!color))
+            put(if (whiteDirection == UP) _f8 else _e8, King(!color))
             put(_g8, Bishop(!color))
             put(_h8, Archer(!color))
             put(_i8, Catapult(!color))
@@ -183,8 +183,8 @@ class BoardViewModel : ViewModel() {
             put(_h7, Pawn(!color, !colorDirection))
             put(_i7, Pawn(!color, !colorDirection))
             put(_j7, Pawn(!color, !colorDirection))
-            get(_f1)?.gold = defaultBet
-            get(_f8)?.gold = defaultBet
+            get(if (whiteDirection == UP) _f1 else _e1)?.gold = defaultBet
+            get(if (whiteDirection == UP) _f8 else _e8)?.gold = defaultBet
         })
     }
 
@@ -214,9 +214,9 @@ class BoardViewModel : ViewModel() {
     private fun validateMove(start: Int, end: Int, bc: HashMap<Int, Piece>, isSimulation: Boolean = false): Move {
         val king = bc.values.single{ it is King && it.color == bc[start]!!.color }
         val pieceAtStart = bc[start]
-        val isNotYourTurn = pieceAtStart?.color != turn && !isSimulation
+        //val isNotYourTurn = pieceAtStart?.color != turn && !isSimulation
         val isInsuficientGoldToMove = king.gold < bc[start]?.priceToMove ?: 0
-        if (isNotYourTurn || isInsuficientGoldToMove || event.value == DRAW || event.value == CHECKMATE) return Move(start, end, false)
+        if (isInsuficientGoldToMove || event.value == DRAW || event.value == CHECKMATE) return Move(start, end, false)
 
         val legalPositions = pieceAtStart?.getLegalEndPositionsFrom(start)
         val isCapturing = bc[end] != null
@@ -233,7 +233,10 @@ class BoardViewModel : ViewModel() {
         val isCapatultAndMovingLikeKnight = isCapatultAndMovingLikeKnight(pieceAtStart, start, end, bc)
         val isMovingKing = pieceAtStart is King
         val isKingCapturingDeadlyPeace = isMovingKing && bc[end]?.isDeadly == true
-        val pieceOnKingStartPosition = start == _f1 || start == _f8
+        val pieceOnKingStartPosition = (whiteDirection == UP && start == _f1)
+                || (blackDirection == DOWN && start == _f8)
+                || (whiteDirection == DOWN && start == _e1)
+                || (blackDirection == UP && start == _e8)
         val isCastleEndPosition = isCastleEndPosition(end)
         val isKingTryingCastle = !isSimulation && isMovingKing && pieceOnKingStartPosition && isCastleEndPosition
         val isValidCastleMove = if (isSimulation || !isKingTryingCastle || kingIsInCheck(bc, pieceAtStart?.color) ) false else
@@ -689,6 +692,11 @@ class BoardViewModel : ViewModel() {
             whiteGold += it.gold
             it.gold = 0
         }
+    }
+
+    fun isMyTurn(): Boolean {
+        val myColor = if (whiteDirection == UP) WHITE else BLACK
+        return myColor == turn
     }
 
 

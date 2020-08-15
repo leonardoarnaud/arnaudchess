@@ -15,9 +15,12 @@ import br.com.arnaudchess.R
 import br.com.arnaudchess.model.Piece
 import br.com.arnaudchess.model.Piece.Companion.BLACK
 import br.com.arnaudchess.model.Piece.Companion.WHITE
+import br.com.arnaudchess.model.Room
+import br.com.arnaudchess.positionsMap
 import br.com.arnaudchess.ui.BoardViewModel.Companion.CHECK
 import br.com.arnaudchess.ui.BoardViewModel.Companion.CHECKMATE
 import br.com.arnaudchess.ui.BoardViewModel.Companion.DRAW
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.fragment_board.*
 import java.util.*
 
@@ -25,6 +28,8 @@ private const val ARG_PARAM1 = "param1"
 private const val ARG_PARAM2 = "param2"
 
 class BoardFragment : Fragment() {
+
+    val database = FirebaseDatabase.getInstance()
 
     private var param1: String? = null
     private var param2: String? = null
@@ -71,6 +76,15 @@ class BoardFragment : Fragment() {
                 clearBoard()
                 clearBorders()
                 putPiecesOnBoard(it)
+
+                boardPositions.map {
+                    val square = vm.boardConfiguration.value?.get(it.id)
+                    if (square?.isDeadly == true){
+                        it.getPieceImageView()?.setDeadly(true)
+                    } else {
+                        it.getPieceImageView()?.setDeadly(false)
+                    }
+                }
             }
         })
 
@@ -183,20 +197,31 @@ class BoardFragment : Fragment() {
                 }
             }
         } else {
-            vm.validateMove(
-                start = selectedBoardPositionFrameLayout!!.id,
-                end = sbf.id
-            ).execute()
             clearBorders()
-            selectedBoardPositionFrameLayout = null
-            boardPositions.map {
-                val square = vm.boardConfiguration.value?.get(it.id)
-                if (square?.isDeadly == true){
-                    it.getPieceImageView()?.setDeadly(true)
-                } else {
-                    it.getPieceImageView()?.setDeadly(false)
+
+            if (vm.isMyTurn()){
+                val turn = vm.turn
+                val start = selectedBoardPositionFrameLayout!!.id
+                val end = sbf.id
+                vm.validateMove(
+                    start = start,
+                    end = end
+                ).execute()
+
+
+                val startPositionString = positionsMap.entries.singleOrNull{ it.value == start }?.key
+                val endPositionString = positionsMap.entries.singleOrNull{ it.value == end }?.key
+                activity?.let {
+                    if (startPositionString != null && endPositionString != null){
+                        (it as MainActivity).plays
+                            ?.child(System.currentTimeMillis().toString())
+                            ?.setValue(Room.Play(turn, startPositionString, endPositionString))
+                    }
                 }
+            } else {
+                vm.message.postValue(R.string.is_not_your_turn_message)
             }
+            selectedBoardPositionFrameLayout = null
         }
     }
 
@@ -206,6 +231,15 @@ class BoardFragment : Fragment() {
 
     fun startBlackBottom() {
         vm.start(BLACK)
+    }
+
+    fun moveEnemyPiece(color: Boolean, start: Int, end: Int) {
+        if (vm.turn == color){
+            vm.validateMove(
+                start = start,
+                end = end
+            ).execute()
+        }
     }
 
     companion object {
