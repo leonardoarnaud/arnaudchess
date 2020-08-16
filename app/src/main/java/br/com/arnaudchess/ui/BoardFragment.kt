@@ -15,12 +15,9 @@ import br.com.arnaudchess.R
 import br.com.arnaudchess.model.Piece
 import br.com.arnaudchess.model.Piece.Companion.BLACK
 import br.com.arnaudchess.model.Piece.Companion.WHITE
-import br.com.arnaudchess.model.Room
-import br.com.arnaudchess.positionsMap
 import br.com.arnaudchess.ui.BoardViewModel.Companion.CHECK
 import br.com.arnaudchess.ui.BoardViewModel.Companion.CHECKMATE
 import br.com.arnaudchess.ui.BoardViewModel.Companion.DRAW
-import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.fragment_board.*
 import java.util.*
 
@@ -29,12 +26,8 @@ private const val ARG_PARAM2 = "param2"
 
 class BoardFragment : Fragment() {
 
-    val database = FirebaseDatabase.getInstance()
-
     private var param1: String? = null
     private var param2: String? = null
-
-    private var pieceOnHand: Piece? = null
 
     private var selectedBoardPositionFrameLayout: BoardPositionFrameLayout? = null
 
@@ -128,6 +121,18 @@ class BoardFragment : Fragment() {
             (requireActivity() as MainActivity).setEnemyGold(it)
         }})
 
+        vm.enemyPieceMove.observe(viewLifecycleOwner, Observer { it?.let {
+            moveEnemyPiece(it.start, it.end)
+        }})
+
+        vm.joinedGame.observe(viewLifecycleOwner, Observer { it?.let {
+            vm.start(BLACK)
+        }})
+
+        vm.createdGame.observe(viewLifecycleOwner, Observer { it?.let {
+            vm.start(WHITE)
+        }})
+
         boardPositions.map {
             it.setOnClickListener {
                 selectToMove(it as BoardPositionFrameLayout)
@@ -158,8 +163,8 @@ class BoardFragment : Fragment() {
 
     private fun selectToMove(sbf: BoardPositionFrameLayout) {
         if (selectedBoardPositionFrameLayout != null
-            && (selectedBoardPositionFrameLayout!!.getPieceImageView()?.piece?.color == sbf.getPieceImageView()?.piece?.color ||
-                    selectedBoardPositionFrameLayout!!.getPieceImageView()?.piece?.color != vm.turn)
+            && (selectedBoardPositionFrameLayout!!.getPieceImageView()?.piece?.color == sbf.getPieceImageView()?.piece?.color
+                    || selectedBoardPositionFrameLayout!!.getPieceImageView()?.piece?.color != vm.turn)
         ) {
             clearBorders()
             selectedBoardPositionFrameLayout = null
@@ -200,22 +205,16 @@ class BoardFragment : Fragment() {
             clearBorders()
 
             if (vm.isMyTurn()){
-                val turn = vm.turn
+                val moveColor = vm.turn
                 val start = selectedBoardPositionFrameLayout!!.id
                 val end = sbf.id
                 vm.validateMove(
                     start = start,
                     end = end
-                ).execute()
-
-
-                val startPositionString = positionsMap.entries.singleOrNull{ it.value == start }?.key
-                val endPositionString = positionsMap.entries.singleOrNull{ it.value == end }?.key
-                activity?.let {
-                    if (startPositionString != null && endPositionString != null){
-                        (it as MainActivity).plays
-                            ?.child(System.currentTimeMillis().toString())
-                            ?.setValue(Room.Play(turn, startPositionString, endPositionString))
+                ).apply {
+                    if (isValid){
+                        execute()
+                        vm.sendMoveToEnemy(moveColor, start, end)
                     }
                 }
             } else {
@@ -225,24 +224,20 @@ class BoardFragment : Fragment() {
         }
     }
 
-    fun startWhiteBottom() {
-        vm.start(WHITE)
+    private fun moveEnemyPiece(start: Int, end: Int) {
+        vm.validateMove(
+            start = start,
+            end = end
+        ).execute()
     }
 
-    fun startBlackBottom() {
-        vm.start(BLACK)
-    }
-
-    fun moveEnemyPiece(color: Boolean, start: Int, end: Int) {
-        if (vm.turn == color){
-            vm.validateMove(
-                start = start,
-                end = end
-            ).execute()
-        }
+    fun searchOpponent() {
+        vm.searchOpponent()
     }
 
     companion object {
+
+        const val tag = "boardFragmentTag"
 
         @JvmStatic
         fun newInstance(param1: String, param2: String) =

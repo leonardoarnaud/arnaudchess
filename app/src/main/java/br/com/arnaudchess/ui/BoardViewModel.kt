@@ -5,11 +5,14 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import br.com.arnaudchess.*
+import br.com.arnaudchess.R
 import br.com.arnaudchess.model.*
 import br.com.arnaudchess.model.Piece.Companion.BLACK
 import br.com.arnaudchess.model.Piece.Companion.DOWN
 import br.com.arnaudchess.model.Piece.Companion.UP
 import br.com.arnaudchess.model.Piece.Companion.WHITE
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 
 class BoardViewModel : ViewModel() {
 
@@ -28,7 +31,16 @@ class BoardViewModel : ViewModel() {
     val myGold = MutableLiveData<Int>()
     val enemyGold = MutableLiveData<Int>()
 
+    val auth = FirebaseAuth.getInstance()
+    val database = FirebaseDatabase.getInstance()
+    var plays: DatabaseReference? = null
+
+    val enemyPieceMove = MutableLiveData<EnemyPieceMove>()
+    val joinedGame = MutableLiveData<Boolean>()
+    val createdGame = MutableLiveData<Boolean>()
+
     init {
+
         myGold.value = 40000
         enemyGold.value = 50000
     }
@@ -117,7 +129,7 @@ class BoardViewModel : ViewModel() {
     var whiteDirection = false
     var blackDirection = false
 
-    var defaultBet = 300
+    var defaultBet = 3000
 
     fun start(color: Boolean) {
         if (myGold.value ?: 0 < defaultBet || enemyGold.value ?: 0 < defaultBet ) {
@@ -653,7 +665,7 @@ class BoardViewModel : ViewModel() {
                     if (bc[pos]?.color == turn){
                         bc[pos]?.getLegalEndPositionsFrom(pos)?.map { legalPos ->
                             if (validateMove(pos, legalPos).isValid){
-                                if (kingIsInCheck(bc, turn)){
+                                if (kingIsInCheck(bc, bc[pos]?.color)){
                                     event.postValue(CHECK)
                                 }
                                 return@execute
@@ -699,6 +711,102 @@ class BoardViewModel : ViewModel() {
         return myColor == turn
     }
 
+    fun searchOpponent() {
+        auth.uid?.let {
+            val openGameQuery: Query = database.getReference("games")
+            openGameQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (roomSnapshot in snapshot.children) {
+                        if (!roomSnapshot.child("player2").exists()) {
+                            joinGame(roomSnapshot.child("player2"))
+                            return
+                        }
+                    }
+                    createGame()
+                }
+            })
+        }
+    }
+
+    private fun listenMoves(game: DatabaseReference) {
+        plays = game.ref.child("plays")
+        plays?.addChildEventListener(object: ChildEventListener{
+            override fun onCancelled(error: DatabaseError) {
+
+            }
+
+            override fun onChildMoved(snapshot: DataSnapshot, previousChildName: String?) {
+
+            }
+
+            override fun onChildChanged(snapshot: DataSnapshot, previousChildName: String?) {
+
+            }
+
+            override fun onChildAdded(snapshot: DataSnapshot, previousChildName: String?) {
+                val color = snapshot.child("color").value.toString().toBoolean()
+                if (turn == color){
+                    val start = mirrorMap[snapshot.child("start").value.toString()]
+                    val end = mirrorMap[snapshot.child("end").value.toString()]
+                    if (start != null && end != null) {
+                        enemyPieceMove.postValue(EnemyPieceMove(color, start, end))
+                    }
+                }
+            }
+            override fun onChildRemoved(snapshot: DataSnapshot) {
+
+            }
+
+        })
+
+    }
+
+    data class EnemyPieceMove(val color: Boolean, val start: Int, val end: Int)
+
+    private fun joinGame(player2: DataSnapshot) {
+        auth.uid?.let{
+            player2.ref.setValue(
+                Room.Player(
+                    uid = it,
+                    name = auth.currentUser?.displayName ?: "Desconhecido"
+                )
+            )
+            player2.ref.parent?.let {
+                listenMoves(it)
+                joinedGame.postValue(true)
+            }
+        }
+    }
+
+    private fun createGame() {
+        auth.uid?.let{
+            listenMoves(database
+                .getReference("games")
+                .child(System.currentTimeMillis().toString()).apply {
+                    setValue(
+                        Room(
+                            player1 = Room.Player(
+                                uid = it,
+                                name = auth.currentUser?.displayName ?: "Desconhecido"
+                            )
+                        )
+                    )
+                })
+            createdGame.postValue(true)
+        }
+    }
+
+    fun sendMoveToEnemy(color: Boolean, start: Int, end: Int) {
+        val startPositionString = positionsMap.entries.singleOrNull{ it.value == start }?.key
+        val endPositionString = positionsMap.entries.singleOrNull{ it.value == end }?.key
+        if (startPositionString != null && endPositionString != null){
+
+            plays?.child(System.currentTimeMillis().toString())
+                ?.setValue(Room.Play(color, startPositionString, endPositionString))
+        }
+    }
 
     companion object{
         const val WHITE_SQUARE = true
