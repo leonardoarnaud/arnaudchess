@@ -3,6 +3,7 @@ package br.com.arnaudchess.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatActivity
 import br.com.arnaudchess.R
@@ -35,6 +36,9 @@ class MainActivity : AppCompatActivity() {
         }
 
         searchOpponentButton.setOnClickListener {
+            enemyNameTextView.text = getString(R.string.searching_opponent)
+            progressBar.visibility = View.VISIBLE
+            searchOpponentButton.visibility = View.GONE
             boardFragment.searchOpponent()
         }
 
@@ -42,6 +46,10 @@ class MainActivity : AppCompatActivity() {
             FirebaseAuth.getInstance().signOut()
             startLoginActivity()
         }
+    }
+
+    fun hideProgressBar(){
+        progressBar.visibility = View.GONE
     }
 
     override fun onStart() {
@@ -58,11 +66,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setGold(amount: Int) {
-        goldTextView.text = "Meu Gold: $$amount"
+        goldTextView.text = "$$amount"
     }
 
     fun setEnemyGold(amount: Int) {
-        enemyGoldTextView.text = "Inimigo Gold: $$amount"
+        enemyGoldTextView.text = "$$amount"
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -118,7 +118,12 @@ class BoardFragment : Fragment() {
         }})
 
         vm.enemyGold.observe(viewLifecycleOwner, Observer { it?.let {
-            (requireActivity() as MainActivity).setEnemyGold(it)
+            activity?.let { act ->
+                (act as MainActivity).apply{
+                    setEnemyGold(it)
+                    hideProgressBar()
+                }
+            }
         }})
 
         vm.enemyPieceMove.observe(viewLifecycleOwner, Observer { it?.let {
@@ -127,6 +132,9 @@ class BoardFragment : Fragment() {
 
         vm.joinedGame.observe(viewLifecycleOwner, Observer { it?.let {
             vm.start(BLACK)
+            activity?.let{
+                (it as MainActivity).hideProgressBar()
+            }
         }})
 
         vm.createdGame.observe(viewLifecycleOwner, Observer { it?.let {

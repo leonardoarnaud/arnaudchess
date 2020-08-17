@@ -38,11 +38,32 @@ class BoardViewModel : ViewModel() {
     val enemyPieceMove = MutableLiveData<EnemyPieceMove>()
     val joinedGame = MutableLiveData<Boolean>()
     val createdGame = MutableLiveData<Boolean>()
+    val startGold = 50000
 
     init {
+        val usersQuery: Query = database.getReference("users")
+        auth.uid?.let { uid ->
+            usersQuery.addListenerForSingleValueEvent(object : ValueEventListener {
+                override fun onCancelled(error: DatabaseError) {}
 
-        myGold.value = 40000
-        enemyGold.value = 50000
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    for (userSnapshot in snapshot.children) {
+                        if (userSnapshot.child(uid).exists()) {
+                            myGold.postValue(userSnapshot
+                                .child(uid)
+                                .child("gold")
+                                .value.toString().toInt()
+                            )
+                            return
+                        }
+                    }
+                    snapshot.ref.child(uid).child("gold").setValue(startGold)
+                    myGold.postValue(50000)
+                }
+            })
+        }
+
+
     }
 
     private val boardLines = ArrayList<ArrayList<Int>>().apply {
@@ -131,24 +152,19 @@ class BoardViewModel : ViewModel() {
 
     var defaultBet = 3000
 
-    fun start(color: Boolean) {
-        if (myGold.value ?: 0 < defaultBet || enemyGold.value ?: 0 < defaultBet ) {
+    fun start(color: Boolean) { auth.uid?.let { uid ->
+        if (myGold.value ?: 0 < defaultBet) {
             message.postValue(R.string.insuficient_gold)
             return
         }
         reset()
         if (color) {
             whiteGold = myGold.value!! - defaultBet
-            blackGold = enemyGold.value!! - defaultBet
-            myGold.postValue(whiteGold)
-            enemyGold.postValue(blackGold)
+            setGoldFromUid(uid, whiteGold)
         }  else {
             blackGold = myGold.value!! - defaultBet
-            whiteGold = enemyGold.value!! - defaultBet
-            myGold.postValue(blackGold)
-            enemyGold.postValue(whiteGold)
+            setGoldFromUid(uid, blackGold)
         }
-
 
         whiteDirection = if (color) UP else DOWN
         blackDirection = if (color) DOWN else UP
@@ -197,6 +213,27 @@ class BoardViewModel : ViewModel() {
             put(_j7, Pawn(!color, !colorDirection))
             get(if (whiteDirection == UP) _f1 else _e1)?.gold = defaultBet
             get(if (whiteDirection == UP) _f8 else _e8)?.gold = defaultBet
+        })
+    }}
+
+    private fun setGoldFromUid(uid: String, gold: Int) {
+        database.getReference("users").child(uid).child("gold").addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {}
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                snapshot.ref.setValue(gold)
+                myGold.postValue(gold)
+            }
+        })
+    }
+
+    private fun loadEnemyGoldFromUid(uid: String) {
+        database.getReference("users").child(uid).child("gold").addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {}
+
+            override fun onDataChange(snapshot: DataSnapshot) {
+                enemyGold.postValue(snapshot.value?.toString()?.toInt())
+            }
         })
     }
 
@@ -715,12 +752,24 @@ class BoardViewModel : ViewModel() {
         auth.uid?.let {
             val openGameQuery: Query = database.getReference("games")
             openGameQuery.addListenerForSingleValueEvent(object : ValueEventListener {
-                override fun onCancelled(error: DatabaseError) {}
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("firebase", error.message)
+                }
 
                 override fun onDataChange(snapshot: DataSnapshot) {
                     for (roomSnapshot in snapshot.children) {
                         if (!roomSnapshot.child("player2").exists()) {
                             joinGame(roomSnapshot.child("player2"))
+                            roomSnapshot.ref.child("player1").child("uid").addListenerForSingleValueEvent(object: ValueEventListener{
+                                override fun onCancelled(error: DatabaseError) {}
+
+                                override fun onDataChange(snapshot: DataSnapshot) {
+                                    message.postValue(R.string.enemy_found)
+                                    snapshot.value?.let { enemyUid ->
+                                        loadEnemyGoldFromUid(enemyUid.toString())
+                                    }
+                                }
+                            })
                             return
                         }
                     }
@@ -732,7 +781,7 @@ class BoardViewModel : ViewModel() {
 
     private fun listenMoves(game: DatabaseReference) {
         plays = game.ref.child("plays")
-        plays?.addChildEventListener(object: ChildEventListener{
+        plays?.addChildEventListener(object: ChildEventListener {
             override fun onCancelled(error: DatabaseError) {
 
             }
@@ -782,9 +831,10 @@ class BoardViewModel : ViewModel() {
 
     private fun createGame() {
         auth.uid?.let{
-            listenMoves(database
+            val gameRef = database
                 .getReference("games")
-                .child(System.currentTimeMillis().toString()).apply {
+                .child(System.currentTimeMillis().toString())
+            listenMoves(gameRef.apply {
                     setValue(
                         Room(
                             player1 = Room.Player(
@@ -794,6 +844,17 @@ class BoardViewModel : ViewModel() {
                         )
                     )
                 })
+            gameRef.child("player2").child("uid").addValueEventListener(object: ValueEventListener{
+                override fun onCancelled(error: DatabaseError) {}
+
+                override fun onDataChange(snapshot: DataSnapshot) {
+
+                    snapshot.value?.let { enemyUid ->
+                        message.postValue(R.string.enemy_found)
+                        loadEnemyGoldFromUid(enemyUid.toString())
+                    }
+                }
+            })
             createdGame.postValue(true)
         }
     }

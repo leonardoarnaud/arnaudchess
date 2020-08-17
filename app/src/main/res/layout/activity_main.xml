@@ -23,26 +23,29 @@
             android:id="@+id/goldTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="$50000"
+            android:drawableStart="@drawable/ic_gold_coin"
             app:layout_constraintBottom_toTopOf="@+id/myNameTextView"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent" />
+            android:drawablePadding="9dp"
+            android:text="$0"
+            app:layout_constraintStart_toStartOf="parent"/>
 
         <TextView
             android:id="@+id/enemyGoldTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Procurando"
+            android:drawableStart="@drawable/ic_gold_coin"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:drawablePadding="9dp"
+            android:text="$0"
+            app:layout_constraintTop_toTopOf="parent"/>
 
         <Button
             android:id="@+id/searchOpponentButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Encontrar oponente"
-            app:layout_constraintBottom_toBottomOf="@+id/myNameTextView"
+            android:text="@string/search_opponent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/enemyNameTextView" />
@@ -52,10 +55,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Sair"
-            app:layout_constraintBottom_toTopOf="@+id/startBlackButton"
+            app:layout_constraintBottom_toTopOf="@+id/goldTextView"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/enemyNameTextView" />
+            />
 
         <TextView
             android:id="@+id/myNameTextView"
@@ -73,7 +76,16 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/enemyGoldTextView"
-            tools:text="Oponente..." />
+            tools:text="Oponente" />
+
+        <ProgressBar
+            android:id="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/signoutButton"
+            app:layout_constraintEnd_toEndOf="@+id/searchOpponentButton"
+            app:layout_constraintStart_toStartOf="@+id/searchOpponentButton"
+            app:layout_constraintTop_toBottomOf="@+id/searchOpponentButton" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

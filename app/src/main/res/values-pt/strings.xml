@@ -14,4 +14,7 @@
     <string name="title_activity_login">Login</string>
     <string name="login_google">Login com Google</string>
     <string name="is_not_your_turn_message">Não é a sua vez.</string>
+    <string name="enemy_found">Encontramos um adversário!</string>
+    <string name="searching_opponent">Procurando oponente...</string>
+    <string name="search_opponent">Procurar Oponente</string>
 </resources>
